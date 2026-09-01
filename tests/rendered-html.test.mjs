@@ -434,6 +434,7 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(page, /webInstruments\.map/);
   assert.match(page, /Open " \+ instrument\.title/);
   assert.match(page, /data-instrument=\{instrument\.id\}/);
+  assert.doesNotMatch(page + detailView + webInstrumentView, /next\/link|<Link\b/);
   assert.match(webInstrumentData, /id:\s*"imagescansound"/);
   assert.match(webInstrumentData, /href:\s*"\/instruments\/imagescansound"/);
   assert.match(webInstrumentData, /embedSrc:\s*"\/web-instruments\/imagescansound\/index\.html"/);
