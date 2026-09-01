@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { pluginWorks as works, seedSeries } from "./_data/plugins";
 import { webInstruments } from "./_data/web-instruments";
@@ -310,7 +309,7 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
         </h1>
 
         <nav className="plugin-apps" aria-label="Available sound objects">
-          <Link
+          <a
             className="plugin-app"
             href={seedSeries.href}
             aria-label="Open SEED series"
@@ -324,10 +323,10 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
               ))}
             </span>
             <span>{seedSeries.name}</span>
-          </Link>
+          </a>
 
           {homeWorks.map((work) => (
-            <Link
+            <a
               className="plugin-app"
               href={work.detailHref ?? "/"}
               aria-label={"Open " + work.name}
@@ -337,11 +336,11 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
                 <img src={work.iconSrc} alt="" />
               </span>
               <span>{work.name}</span>
-            </Link>
+            </a>
           ))}
 
           {webInstruments.map((instrument) => (
-            <Link
+            <a
               className="plugin-app"
               href={instrument.href}
               aria-label={"Open " + instrument.title}
@@ -355,7 +354,7 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
                 <img src={instrument.iconSrc} alt="" />
               </span>
               <span>{instrument.title}</span>
-            </Link>
+            </a>
           ))}
         </nav>
       </div>
