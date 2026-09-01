@@ -1,4 +1,4 @@
-import Link from "next/link";
+/* eslint-disable @next/next/no-html-link-for-pages -- vinext's production Link runtime currently blocks static route navigation */
 import type { CSSProperties } from "react";
 import type { WebInstrument } from "../_data/web-instruments";
 import styles from "../instruments/web-instrument.module.css";
@@ -15,9 +15,9 @@ export function WebInstrumentView({ instrument }: WebInstrumentViewProps) {
       aria-label={`${instrument.title} web instrument`}
     >
       <header className={styles.toolbar}>
-        <Link className={styles.backLink} href="/" aria-label="Back to Sound Objects">
+        <a className={styles.backLink} href="/" aria-label="Back to Sound Objects">
           <span aria-hidden="true" />
-        </Link>
+        </a>
         <div className={styles.identity}>
           <h1>{instrument.title}</h1>
           <p>{instrument.description}</p>

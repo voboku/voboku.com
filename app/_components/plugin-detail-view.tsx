@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex -- the device's only scroll region must accept keyboard focus */
-import Link from "next/link";
+/* eslint-disable @next/next/no-html-link-for-pages -- vinext's production Link runtime currently blocks static route navigation */
 import type { CSSProperties } from "react";
 import type { PluginDetail } from "../_data/plugins";
 import styles from "../plugins/plugin-detail.module.css";
@@ -24,13 +24,13 @@ export function PluginDetailView({ plugin }: PluginDetailViewProps) {
         aria-label={plugin.title + " plugin page"}
       >
         <header className={styles.island}>
-          <Link
+          <a
             className={styles.backLink}
             href="/"
             aria-label="Back to plugin home"
           >
             <span className={styles.backArrow} aria-hidden="true" />
-          </Link>
+          </a>
           <span className={styles.islandSensor} aria-hidden="true" />
           <span className={styles.islandDot} aria-hidden="true" />
         </header>
@@ -327,7 +327,7 @@ export function PluginDetailView({ plugin }: PluginDetailViewProps) {
             ) : null}
 
             <footer className={styles.footer}>
-              <Link href="/">Plugin Home</Link>
+              <a href="/">Plugin Home</a>
             </footer>
           </article>
         </div>

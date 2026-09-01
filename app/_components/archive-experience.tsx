@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 import { pluginWorks as works } from "../_data/plugins";
@@ -278,13 +277,13 @@ export function ArchiveExperience({
                   }}
                 >
                   {work.detailHref ? (
-                    <Link
+                    <a
                       className="layer-image-button layer-detail-link"
                       href={work.detailHref}
                       aria-label={"View details for " + work.alt}
                     >
                       <img className={layer.crop} src={work.src} alt={work.alt} />
-                    </Link>
+                    </a>
                   ) : (
                     <button
                       className="layer-image-button"
