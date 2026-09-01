@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex -- the device's only scroll region must accept keyboard focus */
+/* eslint-disable @next/next/no-html-link-for-pages -- vinext's production Link runtime currently blocks static route navigation */
 import type { Metadata } from "next";
-import Link from "next/link";
 import { seedSeries } from "../../_data/plugins";
 import styles from "./seed-series.module.css";
 
@@ -43,9 +43,9 @@ export default function SeedSeriesPage() {
         aria-label="SEED series page"
       >
         <header className={styles.island}>
-          <Link className={styles.backLink} href="/" aria-label="Back to plugin home">
+          <a className={styles.backLink} href="/" aria-label="Back to plugin home">
             <span className={styles.backArrow} aria-hidden="true" />
-          </Link>
+          </a>
           <span className={styles.islandSensor} aria-hidden="true" />
           <span className={styles.islandDot} aria-hidden="true" />
         </header>
@@ -67,21 +67,21 @@ export default function SeedSeriesPage() {
               <div className={styles.grid} role="list">
                 {seedSeries.members.map((member) => (
                   member.detailHref ? (
-                    <Link
-                      className={styles.member}
-                      href={member.detailHref}
-                      aria-label={"Open " + member.name}
-                      role="listitem"
-                      key={member.id}
-                    >
-                      <div
-                        className={styles.visual}
-                        data-kind={member.visualKind}
+                    <div className={styles.memberItem} role="listitem" key={member.id}>
+                      <a
+                        className={styles.member}
+                        href={member.detailHref}
+                        aria-label={"Open " + member.name}
                       >
-                        <img src={member.visual} alt={member.visualAlt} />
-                      </div>
-                      <h3>{member.name}</h3>
-                    </Link>
+                        <div
+                          className={styles.visual}
+                          data-kind={member.visualKind}
+                        >
+                          <img src={member.visual} alt={member.visualAlt} />
+                        </div>
+                        <h3>{member.name}</h3>
+                      </a>
+                    </div>
                   ) : (
                     <article className={styles.member} role="listitem" key={member.id}>
                       <div

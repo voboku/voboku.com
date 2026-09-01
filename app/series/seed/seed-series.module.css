@@ -107,6 +107,10 @@
   gap: 17px 12px;
 }
 
+.memberItem {
+  min-width: 0;
+}
+
 .member {
   min-width: 0;
   display: block;
