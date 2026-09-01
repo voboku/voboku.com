@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <canvas id="backdropCanvas" aria-hidden="true"></canvas>
+    <svg class="symbol-bank" aria-hidden="true">
+      <symbol id="sym-contour" viewBox="0 0 120 80">
+        <path d="M9 48c16-18 31-21 47-10 10 7 19 6 29-2 12-10 22-8 27 6" />
+        <path d="M14 55c13-12 25-13 37-5 13 9 26 7 40-4 8-6 14-5 19 2" />
+        <path d="M21 62c11-7 20-6 30 0 14 8 29 7 42-3" />
+        <path d="M35 35c6-10 18-12 29-5 7 4 14 4 20 0" />
+      </symbol>
+      <symbol id="sym-floor" viewBox="0 0 120 80">
+        <path d="M14 14h92v52H14z" />
+        <path d="M14 32h30v34M44 32h30v-18M74 32h32M74 32v34" />
+        <path d="M28 32v10M56 14v12M90 32v12M44 52h14" />
+      </symbol>
+      <symbol id="sym-wave" viewBox="0 0 120 80">
+        <path d="M8 42h13l5-18 8 38 7-28 6 8h12l5-15 9 31 8-22 6 6h25" />
+        <path d="M8 53h20M78 53h34" />
+      </symbol>
+      <symbol id="sym-scan" viewBox="0 0 120 80">
+        <path d="M12 18h80M12 25h98M12 32h65M12 39h88M12 46h54M12 53h93M12 60h72" />
+        <path d="M85 12v56" />
+        <path d="M90 20h12M90 37h18M90 55h10" />
+      </symbol>
+      <symbol id="sym-window" viewBox="0 0 120 80">
+        <path d="M18 18h38v24H18zM64 18h38v14H64zM64 40h20v22H64zM90 40h12v22H90z" />
+        <path d="M24 24h26M70 24h20M70 46h8M94 46h4" />
+      </symbol>
+      <symbol id="sym-measure" viewBox="0 0 120 80">
+        <path d="M12 58h96" />
+        <path d="M18 58V24M34 58V40M50 58V31M66 58V45M82 58V20M98 58V37" />
+        <path d="M18 24h16M50 31h16M82 20h16" />
+      </symbol>
+      <symbol id="sym-notation" viewBox="0 0 120 80">
+        <path d="M14 24h92M14 34h92M14 44h92M14 54h92" />
+        <path d="M32 44c0 5-4 9-10 9s-10-3-10-8 4-9 10-9 10 3 10 8z" />
+        <path d="M32 44V18M60 34c0 4-4 8-9 8s-9-3-9-7 4-8 9-8 9 3 9 7z" />
+        <path d="M60 34V15M83 54c0 4-3 7-8 7s-8-2-8-6 3-7 8-7 8 2 8 6z" />
+        <path d="M83 54V28" />
+      </symbol>
+      <symbol id="sym-pixels" viewBox="0 0 120 80">
+        <path d="M18 18h8v8h-8zM34 18h8v8h-8zM50 18h8v8h-8zM66 18h8v8h-8z" />
+        <path d="M26 34h8v8h-8zM42 34h8v8h-8zM58 34h8v8h-8zM82 34h8v8h-8z" />
+        <path d="M18 50h8v8h-8zM34 50h8v8h-8zM66 50h8v8h-8zM98 50h8v8h-8z" />
+      </symbol>
+      <symbol id="sym-diagram" viewBox="0 0 120 80">
+        <path d="M18 62 42 18l20 30 16-18 24 32" />
+        <path d="M18 62h84M42 18v44M62 48v14M78 30v32" />
+        <path d="M34 34h16M70 44h18M22 54h12" />
+      </symbol>
+    </svg>
+    <svg class="archive-symbols" aria-hidden="true">
+      <use href="#sym-contour" x="7%" y="8%" width="190" height="126" />
+      <use href="#sym-floor" x="74%" y="10%" width="170" height="114" />
+      <use href="#sym-scan" x="11%" y="73%" width="160" height="106" />
+      <use href="#sym-diagram" x="71%" y="70%" width="180" height="120" />
+    </svg>
+    <main class="app">
+      <section class="stage" aria-label="Image to sound instrument">
+        <header class="topbar">
+          <div class="device-brand"></div>
+          <div class="transport">
+            <button id="loadButton" class="icon-button" type="button" title="load image" aria-label="load image">
+              <span>+</span>
+            </button>
+            <button id="playButton" class="play-button" type="button">play</button>
+            <button id="clearButton" class="icon-button" type="button" title="clear" aria-label="clear">×</button>
+          </div>
+        </header>
+
+        <input id="fileInput" type="file" accept="image/*">
+        <input id="sampleInput" type="file" accept=".wav,.mp3,.m4a,.aac,.aif,.aiff,audio/*">
+        <div id="dropZone" class="instrument">
+          <canvas id="scoreCanvas" width="1280" height="760" aria-label="grayscale image scanline score"></canvas>
+          <div id="emptyState" class="empty-state" aria-hidden="true"></div>
+        </div>
+
+        <section class="readout">
+          <div>
+            <span class="label">scan</span>
+            <strong id="scanReadout">left → right</strong>
+          </div>
+          <div>
+            <span class="label">events</span>
+            <strong id="eventReadout">0</strong>
+          </div>
+          <div>
+            <span class="label">scale</span>
+            <strong id="scaleReadout">y → pitch</strong>
+          </div>
+          <div>
+            <span class="label">voice</span>
+            <strong id="voiceReadout">x → time</strong>
+          </div>
+        </section>
+      </section>
+
+      <aside class="controls" aria-label="performance parameters">
+        <div class="panel module-image">
+          <div class="panel-head">
+            <h2>Image</h2>
+            <span id="imageReadout" class="module-value">grayscale scan</span>
+          </div>
+          <svg class="panel-symbol" aria-hidden="true"><use href="#sym-contour"></use></svg>
+          <label class="control-row">
+            <span>edge</span>
+            <input id="edgeControl" type="range" min="6" max="120" value="14">
+          </label>
+          <label class="control-row">
+            <span>density</span>
+            <input id="densityControl" type="range" min="1" max="12" value="7">
+          </label>
+          <label class="control-row">
+            <span>detail</span>
+            <input id="detailControl" type="range" min="1" max="12" value="11">
+          </label>
+          <label class="control-row">
+            <span>ink</span>
+            <input id="contrastControl" type="range" min="1" max="10" value="4">
+          </label>
+          <label class="select-row">
+            <span>scan</span>
+            <select id="viewMode">
+              <option value="ascii" selected>ascii</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Pitch</h2>
+            <span id="bpmReadout" class="module-value">92 bpm</span>
+          </div>
+          <svg class="panel-symbol" aria-hidden="true"><use href="#sym-notation"></use></svg>
+          <label class="control-row">
+            <span>BPM</span>
+            <input id="bpmControl" type="range" min="40" max="190" value="54">
+          </label>
+          <label class="control-row">
+            <span>bars</span>
+            <input id="loopBarsControl" type="range" min="4" max="60" value="60">
+          </label>
+          <label class="select-row">
+            <span>meter</span>
+            <select id="meterControl">
+              <option value="4-4">4/4 even</option>
+              <option value="5-8" selected>5/8 short-long</option>
+              <option value="7-8">7/8 2+2+3</option>
+              <option value="9-8">9/8 2+2+2+3</option>
+              <option value="11-8">11/8 uneven</option>
+              <option value="free">free scan</option>
+            </select>
+          </label>
+          <label class="select-row">
+            <span>Key</span>
+            <select id="keyControl">
+              <option>C</option>
+              <option>C#</option>
+              <option>D</option>
+              <option>D#</option>
+              <option>E</option>
+              <option>F</option>
+              <option>F#</option>
+              <option>G</option>
+              <option>G#</option>
+              <option>A</option>
+              <option>A#</option>
+              <option>B</option>
+            </select>
+          </label>
+          <label class="select-row">
+            <span>Scale</span>
+            <select id="scaleControl">
+              <option value="major">major</option>
+              <option value="naturalMinor">natural minor</option>
+              <option value="harmonicMinor">harmonic minor</option>
+              <option value="melodicMinor">melodic minor</option>
+              <option value="chromatic">chromatic</option>
+              <option value="wholeTone">whole tone</option>
+              <option value="octatonic">octatonic</option>
+              <option value="dorian">dorian</option>
+              <option value="lydian">lydian</option>
+              <option value="mixolydian">mixolydian</option>
+              <option value="locrian">locrian</option>
+              <option value="minorPentatonic">minor pentatonic</option>
+              <option value="kalimbaPentatonic" selected>kalimba pentatonic</option>
+              <option value="mbiraCycle">mbira cycle</option>
+              <option value="yo">yo</option>
+              <option value="inScale">in</option>
+              <option value="hirajoshi">hirajoshi</option>
+              <option value="iwato">iwato</option>
+              <option value="ryukyu">ryukyu</option>
+              <option value="slendro">slendro</option>
+              <option value="pelog">pelog</option>
+              <option value="phrygianDominant">phrygian dominant</option>
+              <option value="doubleHarmonic">double harmonic</option>
+              <option value="hungarianMinor">hungarian minor</option>
+              <option value="altered">altered</option>
+              <option value="ragaMinor">raga minor</option>
+              <option value="ragaMajor">raga major</option>
+              <option value="justIntonation">just intonation</option>
+              <option value="tet19">19-tet</option>
+              <option value="tet24">24-tet</option>
+              <option value="harmonicSeries">harmonic series</option>
+              <option value="morphing">morphing</option>
+            </select>
+          </label>
+          <label class="control-row">
+            <span>octave</span>
+            <input id="octaveControl" type="range" min="-2" max="2" value="0">
+          </label>
+        </div>
+
+        <div class="panel module-voice">
+          <div class="panel-head">
+            <h2>Voice</h2>
+            <span id="filterReadout" class="module-value">2.8 kHz</span>
+          </div>
+          <svg class="panel-symbol" aria-hidden="true"><use href="#sym-wave"></use></svg>
+          <label class="select-row">
+            <span>voice</span>
+            <select id="voiceControl">
+              <option value="auto">color auto</option>
+              <option value="sine">q sine</option>
+              <option value="fm">folded fm</option>
+              <option value="sample">sample scan</option>
+            </select>
+          </label>
+          <label id="sampleLoadButton" class="text-button" for="sampleInput" role="button" tabindex="0">load sample</label>
+          <div id="sampleNameReadout" class="sample-name">no sample</div>
+          <label class="control-row">
+            <span>sample</span>
+            <input id="sampleLevelControl" type="range" min="0" max="140" value="86">
+          </label>
+          <label class="control-row">
+            <span>window</span>
+            <input id="sampleWindowControl" type="range" min="20" max="900" value="180">
+          </label>
+          <label class="switch">
+            <input id="colorMapControl" type="checkbox">
+            <span>color map</span>
+          </label>
+          <label class="control-row">
+            <span>cutoff</span>
+            <input id="cutoffControl" type="range" min="200" max="9000" value="1800">
+          </label>
+          <label class="control-row">
+            <span>res</span>
+            <input id="resonanceControl" type="range" min="0" max="20" value="7">
+          </label>
+          <label class="control-row">
+            <span>attack</span>
+            <input id="attackControl" type="range" min="1" max="220" value="120">
+          </label>
+          <label class="control-row">
+            <span>release</span>
+            <input id="releaseControl" type="range" min="30" max="1600" value="1320">
+          </label>
+          <label class="control-row">
+            <span>slew</span>
+            <input id="glideControl" type="range" min="0" max="100" value="42">
+          </label>
+          <input id="grindControl" type="range" min="0" max="0" value="0" hidden aria-hidden="true">
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Burn</h2>
+            <span id="spaceReadout" class="module-value">open</span>
+          </div>
+          <svg class="panel-symbol" aria-hidden="true"><use href="#sym-floor"></use></svg>
+          <label class="control-row">
+            <span>resolution</span>
+            <input id="grainControl" type="range" min="4" max="18" value="8">
+          </label>
+          <label class="control-row">
+            <span>resonance</span>
+            <input id="voicesControl" type="range" min="1" max="10" value="7">
+          </label>
+          <label class="control-row">
+            <span>erosion</span>
+            <input id="chanceControl" type="range" min="0" max="70" value="70">
+          </label>
+          <label class="control-row">
+            <span>gravity</span>
+            <input id="swingControl" type="range" min="0" max="100" value="42">
+          </label>
+          <label class="control-row">
+            <span>fold</span>
+            <input id="stutterControl" type="range" min="0" max="100" value="24">
+          </label>
+          <label class="control-row">
+            <span>floor</span>
+            <input id="droneControl" type="range" min="0" max="100" value="62">
+          </label>
+          <label class="control-row">
+            <span>air</span>
+            <input id="reverbControl" type="range" min="0" max="100" value="82">
+          </label>
+          <input id="delayControl" type="range" min="0" max="100" value="38" hidden aria-hidden="true">
+          <label class="control-row">
+            <span>memory</span>
+            <input id="feedbackControl" type="range" min="0" max="86" value="18">
+          </label>
+        </div>
+
+        <div class="panel module-granular">
+          <div class="panel-head">
+            <h2>Granular</h2>
+            <span id="granularReadout" class="module-value">image grains</span>
+          </div>
+          <svg class="panel-symbol" aria-hidden="true"><use href="#sym-pixels"></use></svg>
+          <label class="switch">
+            <input id="granularControl" type="checkbox" checked>
+            <span>grains</span>
+          </label>
+          <label class="control-row">
+            <span>level</span>
+            <input id="granularLevelControl" type="range" min="0" max="120" value="52">
+          </label>
+          <label class="control-row">
+            <span>size</span>
+            <input id="granularSizeControl" type="range" min="8" max="420" value="116">
+          </label>
+          <label class="control-row">
+            <span>density</span>
+            <input id="granularDensityControl" type="range" min="1" max="12" value="4">
+          </label>
+          <label class="control-row">
+            <span>spray</span>
+            <input id="granularSprayControl" type="range" min="0" max="140" value="54">
+          </label>
+          <label class="control-row">
+            <span>shape</span>
+            <input id="granularShapeControl" type="range" min="0" max="100" value="0">
+          </label>
+          <label class="control-row">
+            <span>glitch</span>
+            <input id="granularGlitchControl" type="range" min="0" max="100" value="0">
+          </label>
+          <label class="control-row">
+            <span>noise</span>
+            <input id="granularNoiseControl" type="range" min="0" max="100" value="0">
+          </label>
+          <label class="control-row">
+            <span>pitch</span>
+            <input id="granularPitchControl" type="range" min="-24" max="24" value="0">
+          </label>
+        </div>
+
+        <div class="panel switches">
+          <div class="panel-head">
+            <h2>Perform</h2>
+            <span id="performReadout" class="module-value">audio none</span>
+          </div>
+          <svg class="panel-symbol" aria-hidden="true"><use href="#sym-measure"></use></svg>
+          <label class="switch">
+            <input id="synthMuteControl" type="checkbox">
+            <span>mute synth</span>
+          </label>
+          <label class="switch">
+            <input id="granularMuteControl" type="checkbox">
+            <span>mute grains</span>
+          </label>
+          <label class="switch">
+            <input id="loopControl" type="checkbox" checked>
+            <span>loop</span>
+          </label>
+          <label class="switch">
+            <input id="reverseControl" type="checkbox">
+            <span>reverse</span>
+          </label>
+          <label class="switch">
+            <input id="traceControl" type="checkbox" checked>
+            <span>trace</span>
+          </label>
+          <label class="switch">
+            <input id="marksControl" type="checkbox" checked>
+            <span>marks</span>
+          </label>
+          <div class="perform-actions">
+            <button id="saveImageButton" class="paper-button" type="button">save image</button>
+            <button id="recordButton" class="paper-button" type="button">record</button>
+          </div>
+        </div>
+      </aside>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>
