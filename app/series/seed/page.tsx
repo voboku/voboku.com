@@ -5,7 +5,7 @@ import { seedSeries } from "../../_data/plugins";
 import styles from "./seed-series.module.css";
 
 const canonicalUrl = "https://voboku.com/series/seed/";
-const socialImage = "https://voboku.com/media/driftfield-interface.jpg";
+const socialImage = "https://voboku.com/media/driftfield-interface-current.png";
 
 export const metadata: Metadata = {
   title: "SEED Series — Sound Objects",
@@ -19,8 +19,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: socialImage,
-        width: 1280,
-        height: 884,
+        width: 1040,
+        height: 680,
         alt: "DriftField plugin interface",
       },
     ],

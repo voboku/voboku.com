@@ -227,7 +227,7 @@ export function PluginDetailView({ plugin }: PluginDetailViewProps) {
                         />
                         <div>
                           <p className={styles.previousVersionLabel}>
-                            Previous release
+                            Previous version
                           </p>
                           <h3 id={previousTitleId}>{previous.title}</h3>
                           <p className={styles.previousVersionNumber}>

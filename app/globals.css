@@ -700,6 +700,24 @@ img {
   grid-row: 1 / -1;
 }
 
+.web-applications-folder-icon {
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 4px;
+  background: rgba(214, 214, 207, 0.88);
+}
+
+.web-applications-folder-icon img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 7px;
+  background: #ffffff;
+  object-fit: contain;
+}
+
 .web-instrument-icon {
   background: #f1f0eb;
 }
@@ -1252,6 +1270,10 @@ a:focus-visible {
   .plugin-app {
     min-height: 67px;
     gap: 4px;
+  }
+
+  .plugin-app-icon-only {
+    min-height: 46px;
   }
 
   .plugin-app-icon {

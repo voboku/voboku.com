@@ -40,17 +40,18 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /aria-label="Lock Sound Objects"/);
   assert.doesNotMatch(html, /Opening Sound Objects/);
   assert.match(html, /Available sound objects/);
-  assert.equal((html.match(/class="plugin-app"/g) ?? []).length, 4);
-  assert.match(html, /\/media\/driftfield-icon-tactile-splice\.png/);
+  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 3);
+  assert.match(html, /\/media\/driftfield-icon-soft-sequence\.png/);
   assert.match(html, /\/media\/bugnote-3-icon\.png/);
   assert.doesNotMatch(html, /href="\/plugins\/driftfield"/);
   assert.match(html, /href="\/plugins\/bugnote-3"/);
   assert.match(html, /href="\/series\/seed"/);
   assert.match(html, /Open SEED series/);
-  assert.match(html, /href="\/instruments\/imagescansound"/);
-  assert.match(html, /href="\/instruments\/orbitonic"/);
-  assert.match(html, /Open imagescansound/);
-  assert.match(html, /Open orbitonic/);
+  assert.match(html, /href="\/applications"/);
+  assert.match(html, /Open web applications/);
+  assert.match(html, /<span>Web Applications<\/span>/);
+  assert.doesNotMatch(html, /href="\/instruments\/(?:imagescansound|orbitonic)"/);
+  assert.doesNotMatch(html, /<span>\s*(?:imagescansound|orbitonic)\s*<\/span>/);
   assert.match(html, /\/media\/imagescansound-icon\.svg/);
   assert.match(html, /\/media\/orbitonic-icon\.svg/);
   assert.match(html, /data-instrument="imagescansound"/);
@@ -65,7 +66,38 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });
 
-test("server-renders both playable web instruments in isolated frames", async () => {
+test("server-renders the web applications as one textless collection", async () => {
+  const response = await render("/applications");
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+
+  const html = await response.text();
+  assert.match(html, /<title>Web Applications — Sound Objects<\/title>/);
+  assert.match(html, /aria-label="Web applications"/);
+  assert.match(html, /aria-label="Choose a web application"/);
+  assert.match(html, /Back to Sound Objects/);
+  assert.match(html, /href="\/instruments\/imagescansound"/);
+  assert.match(html, /href="\/instruments\/orbitonic"/);
+  assert.match(html, /Open imagescansound/);
+  assert.match(html, /Open orbitonic/);
+  assert.match(html, /\/media\/imagescansound-icon\.svg/);
+  assert.match(html, /\/media\/orbitonic-icon\.svg/);
+  assert.doesNotMatch(html, />\s*(?:imagescansound|orbitonic)\s*</);
+
+  const exportedHtml = await readFile(
+    new URL("../dist/client/applications.html", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    exportedHtml,
+    /<link rel="canonical" href="https:\/\/voboku\.com\/applications\/"\/>/,
+  );
+  assert.match(exportedHtml, /href="\/instruments\/imagescansound"/);
+  assert.match(exportedHtml, /href="\/instruments\/orbitonic"/);
+  assert.doesNotMatch(exportedHtml, />\s*(?:imagescansound|orbitonic)\s*</);
+});
+
+test("server-renders lightweight launch screens for both web instruments", async () => {
   for (const instrument of [
     {
       slug: "imagescansound",
@@ -90,14 +122,19 @@ test("server-renders both playable web instruments in isolated frames", async ()
     assert.match(html, /href="\/"/);
     assert.match(
       html,
-      new RegExp(`src="/web-instruments/${instrument.slug}/index\\.html"`),
+      new RegExp(`href="/web-instruments/${instrument.slug}/index\\.html"`),
     );
-    assert.match(html, new RegExp(`${instrument.title} playable instrument`));
-    assert.match(html, /allow="autoplay; web-share; screen-wake-lock"/);
     assert.match(
       html,
-      /sandbox="allow-scripts allow-downloads allow-popups allow-same-origin"/,
+      new RegExp(`<img[^>]+src="/media/${instrument.slug}-icon\\.svg"[^>]*>`),
     );
+    assert.match(
+      html,
+      new RegExp(
+        `<button[^>]+aria-label="Launch ${instrument.title}"[^>]*>\\s*Launch\\s*</button>`,
+      ),
+    );
+    assert.doesNotMatch(html, /<iframe\b/);
     assert.match(html, /target="_blank"/);
     assert.match(html, /rel="noopener noreferrer"/);
     assert.doesNotMatch(html, /https:\/\/(?:imagescansound|orbitonic)\.netlify\.app/);
@@ -130,7 +167,7 @@ test("server-renders the SEED series as one grouped collection", async () => {
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });
 
-test("server-renders bugnote 3 with a pending public download", async () => {
+test("server-renders bugnote 3 with a public test download", async () => {
   const response = await render("/plugins/bugnote-3");
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -146,19 +183,37 @@ test("server-renders bugnote 3 with a pending public download", async () => {
   assert.match(html, /AU \/ VST3 \/ Standalone/);
   assert.match(html, /An interactive granular instrument/);
   assert.match(html, />Download</);
-  assert.match(html, /Preparing release/);
-  assert.match(html, /Release build in preparation/);
-  assert.match(html, /A public macOS build is not available yet/);
+  assert.match(html, /Test build/);
+  assert.match(html, /Download for macOS/);
+  assert.match(html, /22\.6 MB ZIP/);
+  assert.match(
+    html,
+    /downloading, opening, or adding this test build to a DAW may be difficult/,
+  );
+  assert.match(
+    html,
+    /href="\/downloads\/bugnote-3-v3\.0\.1-macOS-Universal-2-Public-Test\.zip"/,
+  );
+  assert.match(
+    html,
+    /download="bugnote-3-v3\.0\.1-macOS-Universal-2-Public-Test\.zip"/,
+  );
+  assert.match(html, /File verification/);
+  assert.match(
+    html,
+    /c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094/,
+  );
   assert.equal(
     (html.match(/<a\b[^>]*\bdata-download-link\b/g) ?? []).length,
-    0,
+    1,
   );
+  assert.doesNotMatch(html, /Preparing release|Release build in preparation/);
   assert.doesNotMatch(
     html,
-    /macOS11-candidate\.zip|7219847d1a948dcf013e21685b933864480a2aaa8604f4d593a15607e198a66a|File verification|Test build|Download for macOS/,
+    /Internal candidate|Apple-notarized|distribution rights/i,
   );
   assert.match(html, />Previous version</);
-  assert.match(html, />Previous release</);
+  assert.doesNotMatch(html, />Previous release</);
   assert.match(html, />bugnote</);
   assert.match(html, />v0\.4\.2</);
   assert.match(html, /\/media\/bugnote-legacy-icon\.png/);
@@ -180,7 +235,7 @@ test("server-renders bugnote 3 with a pending public download", async () => {
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });
 
-test("server-renders DriftField with a pending public download", async () => {
+test("server-renders the current DriftField and preserves the earlier interface below", async () => {
   const response = await render("/plugins/driftfield");
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -188,50 +243,78 @@ test("server-renders DriftField with a pending public download", async () => {
   const html = await response.text();
   assert.match(html, /<title>DriftField — Sound Objects<\/title>/);
   assert.match(html, /DriftField plugin page/);
-  assert.match(html, /\/media\/driftfield-icon-tactile-splice\.png/);
-  assert.match(html, /\/media\/driftfield-interface\.jpg/);
-  assert.match(html, /The DriftField plugin interface running inside FL Studio/);
+  assert.match(html, /\/media\/driftfield-icon-soft-sequence\.png/);
+  assert.match(html, /\/media\/driftfield-interface-current\.png/);
+  assert.match(
+    html,
+    /current borderless DriftField interface with sample cells and relationship field/,
+  );
   assert.match(html, /Back to plugin home/);
   assert.match(html, /href="\/"/);
-  assert.match(html, /v0\.5\.1 · DEVELOPMENT/);
+  assert.match(html, /v0\.5\.1 · CURRENT DEVELOPMENT/);
   assert.match(html, /macOS 12\+ \/ Universal 2/);
-  assert.match(html, /VST3 friend test/);
+  assert.match(html, /0\.5\.1 development/);
   assert.match(html, /Up to 64/);
+  assert.match(html, /MUTE \/ REMOVE/);
   assert.match(html, /Growth/);
   assert.match(html, /MATCH/);
   assert.match(html, />Download</);
-  assert.match(html, /Preparing release/);
-  assert.match(html, /Release build in preparation/);
-  assert.match(html, /friend-test build is not available for public download/);
+  assert.match(html, /Test build/);
+  assert.match(html, /Download for macOS/);
+  assert.match(html, /9\.7 MB ZIP/);
   assert.match(
     html,
-    /This screen recording documents the current 0\.5\.1 development build in use/,
+    /downloading, opening, or adding this test build to a DAW may be difficult/,
+  );
+  assert.match(
+    html,
+    /href="\/downloads\/DriftField-0\.5\.1-macOS-Universal-VST3-Friend-Test\.zip"/,
+  );
+  assert.match(
+    html,
+    /download="DriftField-0\.5\.1-macOS-Universal-VST3-Friend-Test\.zip"/,
+  );
+  assert.match(html, /File verification/);
+  assert.match(
+    html,
+    /4491467eb556b885752e55df3a89589d76ee66463b4712b861b911ed2ba796e8/,
+  );
+  assert.match(
+    html,
+    /current borderless 0\.5\.1 interface and Soft Sequence identity/,
   );
   assert.equal(
     (html.match(/<a\b[^>]*\bdata-download-link\b/g) ?? []).length,
-    0,
+    1,
   );
+  assert.doesNotMatch(html, /Preparing release|Release build in preparation/);
   assert.doesNotMatch(
     html,
-    /DriftField-0\.5\.1-macOS-Universal-VST3-Friend-Test\.zip|2d9c0f77f921b7157cbfedc609f99dcd055e41112faa2b376255c16473e24faa|File verification|Test build|Download for macOS/,
+    /Internal candidate|Apple-notarized|distribution rights/i,
   );
-  assert.doesNotMatch(html, /Previous version|bugnote-v0-4-2|bugnote-legacy-icon/);
+  assert.match(html, />Previous version</);
+  assert.match(html, /driftfield-v0-5-1-tactile-splice/);
+  assert.match(html, /v0\.5\.1 · Tactile Splice UI/);
+  assert.match(html, /\/media\/driftfield-icon-tactile-splice\.png/);
+  assert.match(html, /earlier 0\.5\.1 development presentation/);
+  assert.match(html, /not available as a public download/);
+  assert.doesNotMatch(html, /bugnote-v0-4-2|bugnote-legacy-icon/);
   assert.doesNotMatch(html, /\/media\/driftfield\.jpg/);
-  assert.match(html, />Film<\/h2>/);
+  assert.doesNotMatch(html, />Film<\/h2>/);
   assert.equal((html.match(/<video\b/g) ?? []).length, 1);
-  assert.match(html, /preload="metadata"/);
+  assert.match(html, /preload="none"/);
   assert.match(html, /playsInline=""/);
   assert.match(html, /width="1280"/);
   assert.match(html, /height="856"/);
   assert.match(html, /poster="\/media\/driftfield-interface-recording-poster\.jpg"/);
   assert.match(html, /\/media\/driftfield-interface-recording\.mp4/);
   assert.match(html, /\/media\/driftfield-interface-recording-en\.vtt/);
-  assert.match(html, /DriftField interface and sound demonstration/);
+  assert.match(html, /Earlier DriftField interface and sound demonstration/);
   assert.doesNotMatch(html, /<audio\b/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });
 
-test("exports all routes and social metadata without private test builds", async () => {
+test("exports all routes, social metadata, and public test builds", async () => {
   const [
     rootHtml,
     bugnoteHtml,
@@ -239,6 +322,8 @@ test("exports all routes and social metadata without private test builds", async
     seedHtml,
     netlifyConfig,
     driftFieldVideo,
+    bugnoteDownload,
+    driftFieldDownload,
   ] = await Promise.all([
     readFile(new URL("../dist/client/index.html", import.meta.url), "utf8"),
     readFile(new URL("../dist/client/plugins/bugnote-3.html", import.meta.url), "utf8"),
@@ -248,6 +333,18 @@ test("exports all routes and social metadata without private test builds", async
     readFile(
       new URL(
         "../dist/client/media/driftfield-interface-recording.mp4",
+        import.meta.url,
+      ),
+    ),
+    readFile(
+      new URL(
+        "../dist/client/downloads/bugnote-3-v3.0.1-macOS-Universal-2-Public-Test.zip",
+        import.meta.url,
+      ),
+    ),
+    readFile(
+      new URL(
+        "../dist/client/downloads/DriftField-0.5.1-macOS-Universal-VST3-Friend-Test.zip",
         import.meta.url,
       ),
     ),
@@ -261,29 +358,21 @@ test("exports all routes and social metadata without private test builds", async
   assert.match(bugnoteHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/bugnote-3-ui\.jpg"\/>/);
   assert.match(driftFieldHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/driftfield\/"\/>/);
   assert.match(driftFieldHtml, /<meta property="og:title" content="DriftField — Sound Objects"\/>/);
-  assert.match(driftFieldHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/driftfield-interface\.jpg"\/>/);
+  assert.match(driftFieldHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/driftfield-interface-current\.png"\/>/);
   assert.match(seedHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/series\/seed\/"\/>/);
   assert.match(seedHtml, /<meta property="og:title" content="SEED Series — Sound Objects"\/>/);
-  assert.match(seedHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/driftfield-interface\.jpg"\/>/);
+  assert.match(seedHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/driftfield-interface-current\.png"\/>/);
   assert.match(netlifyConfig, /command\s*=\s*"npm test"/);
   assert.match(netlifyConfig, /\[build\.processing\.html\][\s\S]*pretty_urls\s*=\s*true/);
-  await assert.rejects(
-    access(
-      new URL(
-        "../dist/client/downloads/bugnote-3-v3.0.1-macOS-Universal-2-macOS11-candidate.zip",
-        import.meta.url,
-      ),
-    ),
-    (error) => error?.code === "ENOENT",
+  assert.equal(bugnoteDownload.byteLength, 22_590_104);
+  assert.equal(
+    createHash("sha256").update(bugnoteDownload).digest("hex"),
+    "c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094",
   );
-  await assert.rejects(
-    access(
-      new URL(
-        "../dist/client/downloads/DriftField-0.5.1-macOS-Universal-VST3-Friend-Test.zip",
-        import.meta.url,
-      ),
-    ),
-    (error) => error?.code === "ENOENT",
+  assert.equal(driftFieldDownload.byteLength, 9_681_335);
+  assert.equal(
+    createHash("sha256").update(driftFieldDownload).digest("hex"),
+    "4491467eb556b885752e55df3a89589d76ee66463b4712b861b911ed2ba796e8",
   );
   assert.equal(driftFieldVideo.byteLength, 9_236_331);
   assert.equal(
@@ -338,6 +427,13 @@ test("exports the immutable web-instrument snapshots under the same origin", asy
       ),
     );
     assert.doesNotMatch(routeHtml, /https:\/\/voboku\.com\/og\.png/);
+    assert.match(
+      routeHtml,
+      new RegExp(
+        `<button[^>]+aria-label="Launch ${instrument.slug}"[^>]*>\\s*Launch\\s*</button>`,
+      ),
+    );
+    assert.doesNotMatch(routeHtml, /<iframe\b/);
 
     const [sourceIcon, exportedIcon] = await Promise.all([
       readFile(new URL(`../public/media/${instrument.icon.filename}`, import.meta.url)),
@@ -399,7 +495,7 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
 
   assert.match(page, /^"use client";/);
   assert.match(page, /const passcodeLength = 6/);
-  assert.match(page, /const lockPasscode = "000000"/);
+  assert.match(page, /const lockPasscode = "200101"/);
   assert.match(page, /Swipe up to open/);
   assert.match(page, /Open passcode entry/);
   assert.match(page, /Enter Passcode/);
@@ -431,8 +527,10 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.doesNotMatch(page, /lock-orbit/);
   assert.match(page, /!seedMemberIds\.has\(work\.id\)/);
   assert.match(page, /Open SEED series/);
-  assert.match(page, /webInstruments\.map/);
-  assert.match(page, /Open " \+ instrument\.title/);
+  assert.match(page, /webApplications\.members\.map/);
+  assert.match(page, /Open web applications/);
+  assert.match(page, /href=\{webApplications\.href\}/);
+  assert.match(page, /\{webApplications\.name\}/);
   assert.match(page, /data-instrument=\{instrument\.id\}/);
   assert.doesNotMatch(page + detailView + webInstrumentView, /next\/link|<Link\b/);
   assert.match(webInstrumentData, /id:\s*"imagescansound"/);
@@ -445,7 +543,20 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(webInstrumentData, /embedSrc:\s*"\/web-instruments\/orbitonic\/index\.html"/);
   assert.match(webInstrumentData, /iconSrc:\s*"\/media\/orbitonic-icon\.svg"/);
   assert.match(webInstrumentData, /9ce5406c5eb732aa63ab1e0228f6f985917fad87/);
+  assert.match(webInstrumentData, /export const webApplications/);
+  assert.match(webInstrumentData, /href:\s*"\/applications"/);
+  assert.match(webInstrumentData, /members:\s*webInstruments/);
   assert.match(webInstrumentView, /<iframe/);
+  assert.match(webInstrumentView, /useState<"idle" \| "loading" \| "ready">/);
+  assert.match(webInstrumentView, /launchPhase !== "idle"/);
+  assert.match(webInstrumentView, /launchPhase !== "ready"/);
+  assert.match(webInstrumentView, /onLoad=\{handleFrameLoad\}/);
+  assert.match(webInstrumentView, /aria-live=\{loading \? "polite"/);
+  assert.match(
+    webInstrumentView,
+    /aria-label=\{`Launch \$\{instrument\.title\}`\}/,
+  );
+  assert.match(webInstrumentView, /instrument\.iconSrc/);
   assert.match(webInstrumentView, /allow="autoplay; web-share; screen-wake-lock"/);
   assert.match(webInstrumentView, /target="_blank"/);
   assert.match(webInstrumentView, /rel="noopener noreferrer"/);
@@ -456,6 +567,8 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(webInstrumentStyles, /position:\s*fixed/);
   assert.match(webInstrumentStyles, /grid-template-rows:\s*auto minmax\(0, 1fr\)/);
   assert.match(webInstrumentStyles, /min-height:\s*44px/);
+  assert.match(webInstrumentStyles, /\.launchStage/);
+  assert.match(webInstrumentStyles, /\.launchButton\s*\{[\s\S]*?min-height:\s*48px/);
   assert.match(webInstrumentStyles, /\.backLink\s*\{[\s\S]*?background:\s*transparent/);
   assert.match(webInstrumentStyles, /prefers-reduced-motion:\s*reduce/);
   assert.match(pluginData, /name:\s*"DriftField"[\s\S]*?detailHref:\s*"\/plugins\/driftfield"/);
@@ -487,22 +600,25 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(styles, /@keyframes passcode-shake/);
   assert.doesNotMatch(styles, /\.lock-orbit|\.session-gate/);
   assert.match(styles, /\.plugin-apps/);
+  assert.match(styles, /\.web-applications-folder-icon/);
   assert.match(styles, /\.passcode-keypad/);
   assert.match(styles, /\.home-title\s*\{[\s\S]*?clip:\s*rect\(0 0 0 0\)/);
   assert.match(styles, /\.mode-pane\[hidden\]/);
   assert.doesNotMatch(layout, /codex-preview|_sites-preview/);
   assert.match(pluginData, /detailHref:\s*"\/plugins\/driftfield"/);
   assert.match(pluginData, /detailHref:\s*"\/plugins\/bugnote-3"/);
-  assert.ok((pluginData.match(/availability:\s*"pending"/g) ?? []).length >= 1);
+  assert.match(pluginData, /icon:\s*"\/media\/driftfield-icon-soft-sequence\.png"/);
+  assert.match(pluginData, /interfaceImage:\s*"\/media\/driftfield-interface-current\.png"/);
+  assert.match(pluginData, /id:\s*"driftfield-v0-5-1-tactile-splice"/);
+  assert.match(pluginData, /image:\s*"\/media\/driftfield-icon-tactile-splice\.png"/);
   assert.match(
     pluginData,
-    /id:\s*"bugnote-3-macos-universal-2"[\s\S]*?availability:\s*"pending"[\s\S]*?href:\s*null/,
+    /id:\s*"bugnote-3-macos-universal-2"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:\s*"\/downloads\/bugnote-3-v3\.0\.1-macOS-Universal-2-Public-Test\.zip"[\s\S]*?bytes:\s*22_590_104[\s\S]*?c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094/,
   );
   assert.match(
     pluginData,
-    /id:\s*"driftfield-macos-universal-2"[\s\S]*?availability:\s*"pending"[\s\S]*?href:\s*null/,
+    /id:\s*"driftfield-macos-universal-2"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:\s*"\/downloads\/DriftField-0\.5\.1-macOS-Universal-VST3-Friend-Test\.zip"[\s\S]*?bytes:\s*9_681_335[\s\S]*?4491467eb556b885752e55df3a89589d76ee66463b4712b861b911ed2ba796e8/,
   );
-  assert.doesNotMatch(pluginData, /macOS11-candidate\.zip|Friend-Test\.zip/);
   assert.match(pluginData, /previousVersions:\s*\[/);
   assert.match(pluginData, /id:\s*"bugnote-v0-4-2"/);
   assert.match(detailView, /plugin\.previousVersions\?\.length/);
@@ -538,7 +654,16 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
         import.meta.url,
       ),
     ),
+    access(
+      new URL(
+        "../public/media/driftfield-icon-soft-sequence.png",
+        import.meta.url,
+      ),
+    ),
     access(new URL("../public/media/driftfield-interface.jpg", import.meta.url)),
+    access(
+      new URL("../public/media/driftfield-interface-current.png", import.meta.url),
+    ),
     access(
       new URL(
         "../public/media/driftfield-interface-recording.mp4",
@@ -618,6 +743,21 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
     createHash("sha256").update(driftFieldIconBytes).digest("hex"),
     "12d7be029dbad8eca176e0603ddc805858ec426b5875b5ac7085722bf8a76c3a",
   );
+  const currentDriftFieldIconUrl = new URL(
+    "../public/media/driftfield-icon-soft-sequence.png",
+    import.meta.url,
+  );
+  const currentDriftFieldIcon = await stat(currentDriftFieldIconUrl);
+  assert.equal(currentDriftFieldIcon.size, 57_047);
+  assert.ok(
+    currentDriftFieldIcon.size < 200_000,
+    "current DriftField icon should stay lightweight",
+  );
+  const currentDriftFieldIconBytes = await readFile(currentDriftFieldIconUrl);
+  assert.equal(
+    createHash("sha256").update(currentDriftFieldIconBytes).digest("hex"),
+    "dd59624f908df909b44431d987c0db257b1e3c869813a0a193fa5c6fc71e0f1f",
+  );
   const driftFieldInterfaceUrl = new URL(
     "../public/media/driftfield-interface.jpg",
     import.meta.url,
@@ -632,6 +772,23 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.equal(
     createHash("sha256").update(driftFieldInterfaceBytes).digest("hex"),
     "c2dcc2d65adf0902307bbad770c090777e888843be10a09759d273025d7e7119",
+  );
+  const currentDriftFieldInterfaceUrl = new URL(
+    "../public/media/driftfield-interface-current.png",
+    import.meta.url,
+  );
+  const currentDriftFieldInterface = await stat(currentDriftFieldInterfaceUrl);
+  assert.equal(currentDriftFieldInterface.size, 43_557);
+  assert.ok(
+    currentDriftFieldInterface.size < 200_000,
+    "current DriftField interface screenshot should stay lightweight",
+  );
+  const currentDriftFieldInterfaceBytes = await readFile(
+    currentDriftFieldInterfaceUrl,
+  );
+  assert.equal(
+    createHash("sha256").update(currentDriftFieldInterfaceBytes).digest("hex"),
+    "62d837c73f8f6c22268147b5506a1e0ce53e53f73f9b5bc6706b26bbfc48cf1d",
   );
   const driftFieldVideoUrl = new URL(
     "../public/media/driftfield-interface-recording.mp4",
@@ -670,22 +827,26 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(driftFieldCaptions, /^WEBVTT/);
   assert.match(driftFieldCaptions, /DriftField interface and generated audio/);
 
-  await assert.rejects(
-    access(
-      new URL(
-        "../public/downloads/bugnote-3-v3.0.1-macOS-Universal-2-macOS11-candidate.zip",
-        import.meta.url,
-      ),
+  const bugnoteDownload = await readFile(
+    new URL(
+      "../public/downloads/bugnote-3-v3.0.1-macOS-Universal-2-Public-Test.zip",
+      import.meta.url,
     ),
-    (error) => error?.code === "ENOENT",
   );
-  await assert.rejects(
-    access(
-      new URL(
-        "../public/downloads/DriftField-0.5.1-macOS-Universal-VST3-Friend-Test.zip",
-        import.meta.url,
-      ),
+  assert.equal(bugnoteDownload.byteLength, 22_590_104);
+  assert.equal(
+    createHash("sha256").update(bugnoteDownload).digest("hex"),
+    "c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094",
+  );
+  const driftFieldDownload = await readFile(
+    new URL(
+      "../public/downloads/DriftField-0.5.1-macOS-Universal-VST3-Friend-Test.zip",
+      import.meta.url,
     ),
-    (error) => error?.code === "ENOENT",
+  );
+  assert.equal(driftFieldDownload.byteLength, 9_681_335);
+  assert.equal(
+    createHash("sha256").update(driftFieldDownload).digest("hex"),
+    "4491467eb556b885752e55df3a89589d76ee66463b4712b861b911ed2ba796e8",
   );
 });

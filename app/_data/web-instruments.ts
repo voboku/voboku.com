@@ -37,6 +37,14 @@ export const webInstruments = [
   },
 ] as const satisfies readonly WebInstrument[];
 
+export const webApplications = {
+  id: "web-applications",
+  name: "Web Applications",
+  href: "/applications",
+  description: "Browser-based musical instruments and sound tools.",
+  members: webInstruments,
+} as const;
+
 export function getWebInstrument(id: WebInstrument["id"]) {
   return webInstruments.find((instrument) => instrument.id === id)!;
 }

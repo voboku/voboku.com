@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { pluginWorks as works, seedSeries } from "./_data/plugins";
-import { webInstruments } from "./_data/web-instruments";
+import { webApplications } from "./_data/web-instruments";
 
 type Phase = "checking" | "locked" | "passcode" | "home";
 
@@ -12,7 +12,7 @@ type Clock = {
 };
 
 const passcodeLength = 6;
-const lockPasscode = "000000";
+const lockPasscode = "200101";
 const unlockStorageKey = "sound-objects-unlocked-v1";
 const seedMemberIds = new Set<string>(
   seedSeries.members.map((member) => member.id),
@@ -339,23 +339,26 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
             </a>
           ))}
 
-          {webInstruments.map((instrument) => (
-            <a
-              className="plugin-app"
-              href={instrument.href}
-              aria-label={"Open " + instrument.title}
-              key={instrument.id}
+          <a
+            className="plugin-app"
+            href={webApplications.href}
+            aria-label="Open web applications"
+          >
+            <span
+              className="plugin-app-icon web-applications-folder-icon"
+              aria-hidden="true"
             >
-              <span
-                className="plugin-app-icon web-instrument-icon"
-                data-instrument={instrument.id}
-                aria-hidden="true"
-              >
-                <img src={instrument.iconSrc} alt="" />
-              </span>
-              <span>{instrument.title}</span>
-            </a>
-          ))}
+              {webApplications.members.map((instrument) => (
+                <img
+                  src={instrument.iconSrc}
+                  alt=""
+                  data-instrument={instrument.id}
+                  key={instrument.id}
+                />
+              ))}
+            </span>
+            <span>{webApplications.name}</span>
+          </a>
         </nav>
       </div>
     </section>
