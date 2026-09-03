@@ -1,8 +1,11 @@
-# Sound Objects Archive
+# Sound Objects
 
-A responsive, visual-first archive for plugins, music, sample materials, and live documents.
+A responsive, app-like archive for music plug-ins and browser instruments.
 
-The desktop presentation places a scrollable white phone silhouette on an acid-lime field. Small screens retain the lime edge and rounded device shape. The interface intentionally contains no visible editorial copy yet; accessible labels remain available to assistive technology.
+The current site includes dedicated pages for DriftField and bugnote 3,
+downloadable macOS public test builds, a SEED series collection, and isolated
+launch pages for imagescansound and orbitonic. The interface uses a white phone
+silhouette on an acid-lime field and keeps visible copy intentionally compact.
 
 ## Local development
 
@@ -14,8 +17,15 @@ npm run dev
 ## Validation
 
 ```bash
-npm run build
-node --test tests/rendered-html.test.mjs
+npm test
+npm run lint
 ```
 
-Visible wording and final external links are reserved for the next content pass.
+## Netlify
+
+Connect the repository root to Netlify. The included `netlify.toml` runs the
+build and validation suite, then publishes `dist/client` as a static site using
+Node.js 22.13.0.
+
+The downloadable plug-ins are clearly labelled test builds. Their pages include
+compatibility notes and SHA-256 values for file verification.
