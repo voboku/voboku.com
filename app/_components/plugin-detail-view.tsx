@@ -151,7 +151,7 @@ export function PluginDetailView({ plugin }: PluginDetailViewProps) {
                         aria-describedby={detailsId + " " + noteId}
                       >
                         {download.availability === "candidate"
-                          ? "Download for macOS"
+                          ? "Download for " + download.platform
                           : download.delivery === "external-page"
                           ? "Open download page"
                           : "Download " + download.label}
