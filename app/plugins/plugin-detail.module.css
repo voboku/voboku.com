@@ -195,6 +195,10 @@
   background: color-mix(in srgb, var(--plugin-accent) 5%, #fbfaf8);
 }
 
+.downloadCard + .downloadCard {
+  margin-top: 10px;
+}
+
 .downloadHeading {
   display: flex;
   align-items: center;
