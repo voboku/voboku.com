@@ -272,7 +272,7 @@ type PluginHomeProps = {
   active: boolean;
   clock: Clock;
   headingRef: React.RefObject<HTMLHeadingElement | null>;
-  onLock: () => void;
+  onLock: (restoreFocus: boolean) => void;
 };
 
 function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
@@ -289,7 +289,7 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
         <button
           className="home-lock-button"
           type="button"
-          onClick={onLock}
+          onClick={(event) => onLock(event.detail === 0)}
           aria-label="Lock Sound Objects"
         >
           <span className="os-island home-island" aria-hidden="true">
@@ -468,7 +468,7 @@ export default function Home() {
     window.requestAnimationFrame(() => homeHeadingRef.current?.focus());
   };
 
-  const relock = () => {
+  const relock = (restoreFocus: boolean) => {
     clearWrongPasscodeTimer();
     pointerStartYRef.current = null;
     setPasscode("");
@@ -479,7 +479,9 @@ export default function Home() {
       // The current visit still locks when browser storage is unavailable.
     }
     setPhase("locked");
-    window.requestAnimationFrame(() => lockScreenOpenRef.current?.focus());
+    if (restoreFocus) {
+      window.requestAnimationFrame(() => lockScreenOpenRef.current?.focus());
+    }
   };
 
   const enterDigit = (digit: string) => {
