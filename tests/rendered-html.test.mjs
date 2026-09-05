@@ -167,7 +167,7 @@ test("server-renders the SEED series as one grouped collection", async () => {
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });
 
-test("server-renders bugnote 3 with a public test download", async () => {
+test("server-renders bugnote 3 with macOS and Windows public test downloads", async () => {
   const response = await render("/plugins/bugnote-3");
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -179,13 +179,15 @@ test("server-renders bugnote 3 with a public test download", async () => {
   assert.match(html, /\/media\/bugnote-3-icon\.png/);
   assert.match(html, /Back to plugin home/);
   assert.match(html, /href="\/"/);
-  assert.match(html, /macOS 11 target \/ Universal 2/);
-  assert.match(html, /AU \/ VST3 \/ Standalone/);
+  assert.match(html, /macOS 11 target \/ Windows x64/);
+  assert.match(html, /macOS: AU \/ VST3 \/ Standalone · Windows: VST3 \/ Standalone/);
   assert.match(html, /An interactive granular instrument/);
   assert.match(html, />Download</);
-  assert.match(html, /Test build/);
+  assert.ok((html.match(/Test build/g) ?? []).length >= 2);
   assert.match(html, /Download for macOS/);
+  assert.match(html, /Download for Windows/);
   assert.match(html, /22\.6 MB ZIP/);
+  assert.match(html, /7\.1 MB ZIP/);
   assert.match(
     html,
     /downloading, opening, or adding this test build to a DAW may be difficult/,
@@ -194,15 +196,28 @@ test("server-renders bugnote 3 with a public test download", async () => {
     html,
     /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-03\/bugnote-3-v3\.0\.1-macOS-Universal-2-Public-Test\.zip"/,
   );
+  assert.match(
+    html,
+    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-03\/bugnote-3-Windows-x64\.zip"/,
+  );
+  assert.match(html, /Windows build has not yet been tested in a DAW on Windows/);
   assert.doesNotMatch(html, /\sdownload=/);
-  assert.match(html, /File verification/);
+  assert.ok((html.match(/File verification/g) ?? []).length >= 2);
   assert.match(
     html,
     /c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094/,
   );
+  assert.match(
+    html,
+    /ab072815ee185b77d2ffd3168fc425dc11ba8416c208c2a9300df21cba3de399/,
+  );
   assert.equal(
     (html.match(/<a\b[^>]*\bdata-download-link\b/g) ?? []).length,
-    1,
+    2,
+  );
+  assert.ok(
+    html.indexOf("bugnote-3-v3.0.1-macOS-Universal-2-Public-Test.zip") <
+      html.indexOf("bugnote-3-Windows-x64.zip"),
   );
   assert.doesNotMatch(html, /Preparing release|Release build in preparation/);
   assert.doesNotMatch(
@@ -493,6 +508,9 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(page, /localStorage\.setItem\(unlockStorageKey, "1"\)/);
   assert.match(page, /localStorage\.removeItem\(unlockStorageKey\)/);
   assert.match(page, /aria-label="Lock Sound Objects"/);
+  assert.match(page, /onLock\(event\.detail === 0\)/);
+  assert.match(page, /const relock = \(restoreFocus: boolean\)/);
+  assert.match(page, /if \(restoreFocus\) \{[\s\S]*?lockScreenOpenRef\.current\?\.focus\(\)/);
   assert.match(page, /lockScreenOpenRef\.current\?\.focus\(\)/);
   assert.doesNotMatch(page, /sessionStorage|sessionKey|session-gate/);
   assert.match(page, /onPointerDown/);
@@ -599,6 +617,10 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(
     pluginData,
     /id:\s*"bugnote-3-macos-universal-2"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:[\s\S]*?"https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-03\/bugnote-3-v3\.0\.1-macOS-Universal-2-Public-Test\.zip"[\s\S]*?delivery:\s*"external-file"[\s\S]*?bytes:\s*22_590_104[\s\S]*?c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094/,
+  );
+  assert.match(
+    pluginData,
+    /id:\s*"bugnote-3-windows-x64"[\s\S]*?platform:\s*"Windows"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:[\s\S]*?"https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-03\/bugnote-3-Windows-x64\.zip"[\s\S]*?delivery:\s*"external-file"[\s\S]*?bytes:\s*7_053_101[\s\S]*?ab072815ee185b77d2ffd3168fc425dc11ba8416c208c2a9300df21cba3de399/,
   );
   assert.match(
     pluginData,
