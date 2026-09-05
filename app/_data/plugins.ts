@@ -53,6 +53,7 @@ export type PreviousPluginVersion = {
 
 type PluginDownloadBase = {
   id: string;
+  platform: "macOS" | "Windows";
   label: string;
   meta: string;
   note: string;
@@ -233,14 +234,16 @@ export const bugnote3: PluginDetail = {
   downloads: [
     {
       id: "bugnote-3-macos-universal-2",
+      platform: "macOS",
       label: "macOS Universal 2",
       meta:
         "v3.0.1 · macOS 11 target · Universal 2 · AU / VST3 / Standalone · 22.6 MB ZIP",
       note:
         "On some Macs, downloading, opening, or adding this test build to a DAW may be difficult. If it does not open or appear in your DAW, wait for a later build.",
       availability: "candidate",
-      href: "/downloads/bugnote-3-v3.0.1-macOS-Universal-2-Public-Test.zip",
-      delivery: "same-origin-file",
+      href:
+        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-03/bugnote-3-v3.0.1-macOS-Universal-2-Public-Test.zip",
+      delivery: "external-file",
       filename:
         "bugnote-3-v3.0.1-macOS-Universal-2-Public-Test.zip",
       bytes: 22_590_104,
@@ -275,7 +278,7 @@ export const driftField: PluginDetail = {
   accent: "#277a72",
   mediaBackground: "#f6efe4",
   facts: [
-    { label: "System", value: "macOS 12+ / Universal 2" },
+    { label: "System", value: "macOS 12+ / Windows x64" },
     { label: "Current build", value: "0.5.1 development" },
     { label: "Samples", value: "Up to 64" },
     { label: "Voices", value: "32" },
@@ -286,18 +289,36 @@ export const driftField: PluginDetail = {
   downloads: [
     {
       id: "driftfield-macos-universal-2",
+      platform: "macOS",
       label: "macOS Universal 2 · VST3",
       meta:
         "v0.5.1 · macOS 12+ · Universal 2 · VST3 · 9.7 MB ZIP",
       note:
         "On some Macs, downloading, opening, or adding this test build to a DAW may be difficult. If it does not open or appear in your DAW, wait for a later build.",
       availability: "candidate",
-      href: "/downloads/DriftField-0.5.1-macOS-Universal-VST3-Friend-Test.zip",
-      delivery: "same-origin-file",
+      href:
+        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-03/DriftField-0.5.1-macOS-Universal-VST3-Friend-Test.zip",
+      delivery: "external-file",
       filename: "DriftField-0.5.1-macOS-Universal-VST3-Friend-Test.zip",
       bytes: 9_681_335,
       sha256:
         "4491467eb556b885752e55df3a89589d76ee66463b4712b861b911ed2ba796e8",
+    },
+    {
+      id: "driftfield-windows-x64",
+      platform: "Windows",
+      label: "Windows x64 · VST3",
+      meta: "v0.5.1 · Windows x64 · VST3 · 3.5 MB ZIP",
+      note:
+        "This cross-build has not yet been tested on Windows. Downloading, extracting, or adding it to a DAW may be difficult. If it does not open or appear, wait for a later build.",
+      availability: "candidate",
+      href:
+        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-03/DriftField-0.5.1-Windows-x64-VST3-Friend-Test-CrossBuild.zip",
+      delivery: "external-file",
+      filename: "DriftField-0.5.1-Windows-x64-VST3-Friend-Test-CrossBuild.zip",
+      bytes: 3_506_164,
+      sha256:
+        "614c41aae466747dc3315033bf123ab448ec533b4831e1750d4d247a021b4084",
     },
   ],
   videos: [],
