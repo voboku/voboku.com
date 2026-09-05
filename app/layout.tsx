@@ -1,32 +1,28 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const blankLinkPreviewTitle = "\u200B";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://voboku.com"),
-  title: "Sound Objects — Music Plugins",
-  description:
-    "A mobile collection of experimental music plugins and playable sound objects.",
+  title: blankLinkPreviewTitle,
   openGraph: {
-    title: "Sound Objects — Music Plugins",
-    description:
-      "A mobile collection of experimental music plugins and playable sound objects.",
+    title: blankLinkPreviewTitle,
     url: "https://voboku.com/",
     type: "website",
     images: [
       {
-        url: "https://voboku.com/og.png",
+        url: "https://voboku.com/og-white-20260905.png",
         width: 1200,
         height: 630,
-        alt: "Sound Objects music operating system",
+        alt: "",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sound Objects — Music Plugins",
-    description:
-      "A mobile collection of experimental music plugins and playable sound objects.",
-    images: ["https://voboku.com/og.png"],
+    title: blankLinkPreviewTitle,
+    images: ["https://voboku.com/og-white-20260905.png"],
   },
   icons: {
     icon: "/favicon.svg",
