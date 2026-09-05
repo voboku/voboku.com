@@ -192,8 +192,11 @@ export const bugnote3: PluginDetail = {
   accent: "#3f70a8",
   mediaBackground: "#6d98d5",
   facts: [
-    { label: "System", value: "macOS 11 target / Universal 2" },
-    { label: "Formats", value: "AU / VST3 / Standalone" },
+    { label: "System", value: "macOS 11 target / Windows x64" },
+    {
+      label: "Formats",
+      value: "macOS: AU / VST3 / Standalone · Windows: VST3 / Standalone",
+    },
     { label: "Particles", value: "8,000" },
     { label: "Chops", value: "128–512" },
     { label: "Voices", value: "Up to 6" },
@@ -249,6 +252,23 @@ export const bugnote3: PluginDetail = {
       bytes: 22_590_104,
       sha256:
         "c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094",
+    },
+    {
+      id: "bugnote-3-windows-x64",
+      platform: "Windows",
+      label: "Windows x64 · VST3 / Standalone",
+      meta:
+        "v3.0.1 · Windows x64 · VST3 / Standalone · 7.1 MB ZIP",
+      note:
+        "This Windows build has not yet been tested in a DAW on Windows. Downloading, extracting, or adding it to a DAW may be difficult. If it does not open or appear, wait for a later build.",
+      availability: "candidate",
+      href:
+        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-03/bugnote-3-Windows-x64.zip",
+      delivery: "external-file",
+      filename: "bugnote-3-Windows-x64.zip",
+      bytes: 7_053_101,
+      sha256:
+        "ab072815ee185b77d2ffd3168fc425dc11ba8416c208c2a9300df21cba3de399",
     },
   ],
   // Add user-authored media here when it is ready. Large video/audio `src`
