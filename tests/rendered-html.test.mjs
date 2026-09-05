@@ -30,7 +30,8 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Sound Objects — Music Plugins<\/title>/);
+  assert.match(html, /<title>\u200b<\/title>/);
+  assert.doesNotMatch(html, /<title>Sound Objects(?: — Music Plugins)?<\/title>/);
   assert.match(html, /aria-busy="true"/);
   assert.doesNotMatch(html, /Sound Objects lock screen/);
   assert.doesNotMatch(html, /Swipe up to open|Open passcode entry/);
@@ -346,6 +347,8 @@ test("exports all routes, social metadata, and public test builds", async () => 
     seedHtml,
     netlifyConfig,
     driftFieldVideo,
+    rootOgSource,
+    rootOgExport,
   ] = await Promise.all([
     readFile(new URL("../dist/client/index.html", import.meta.url), "utf8"),
     readFile(new URL("../dist/client/plugins/bugnote-3.html", import.meta.url), "utf8"),
@@ -358,11 +361,26 @@ test("exports all routes, social metadata, and public test builds", async () => 
         import.meta.url,
       ),
     ),
+    readFile(new URL("../public/og-white-20260905.png", import.meta.url)),
+    readFile(new URL("../dist/client/og-white-20260905.png", import.meta.url)),
   ]);
 
-  assert.match(rootHtml, /<meta property="og:title" content="Sound Objects — Music Plugins"\/>/);
-  assert.match(rootHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/og\.png"\/>/);
-  assert.match(rootHtml, /<meta name="twitter:image" content="https:\/\/voboku\.com\/og\.png"\/>/);
+  assert.match(rootHtml, /<meta property="og:title" content="\u200b"\/>/);
+  assert.match(rootHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/og-white-20260905\.png"\/>/);
+  assert.match(rootHtml, /<meta name="twitter:title" content="\u200b"\/>/);
+  assert.match(rootHtml, /<meta name="twitter:image" content="https:\/\/voboku\.com\/og-white-20260905\.png"\/>/);
+  assert.doesNotMatch(rootHtml, /<meta (?:property="og:description"|name="twitter:description")/);
+  assert.doesNotMatch(rootHtml, /Sound Objects — Music Plugins|https:\/\/voboku\.com\/og\.png|https:\/\/voboku\.com\/og-white\.png/);
+  assert.equal(rootOgSource.byteLength, 3_152);
+  assert.equal(rootOgExport.byteLength, rootOgSource.byteLength);
+  assert.equal(
+    createHash("sha256").update(rootOgSource).digest("hex"),
+    "da08f2174182fd5fd07a27b2a4e6dd78b53f46a7567cb75f86e694f500c461bf",
+  );
+  assert.equal(
+    createHash("sha256").update(rootOgExport).digest("hex"),
+    "da08f2174182fd5fd07a27b2a4e6dd78b53f46a7567cb75f86e694f500c461bf",
+  );
   assert.match(bugnoteHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/bugnote-3\/"\/>/);
   assert.match(bugnoteHtml, /<meta property="og:title" content="bugnote 3 — Sound Objects"\/>/);
   assert.match(bugnoteHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/bugnote-3-ui\.jpg"\/>/);
