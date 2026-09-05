@@ -192,12 +192,9 @@ test("server-renders bugnote 3 with a public test download", async () => {
   );
   assert.match(
     html,
-    /href="\/downloads\/bugnote-3-v3\.0\.1-macOS-Universal-2-Public-Test\.zip"/,
+    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-03\/bugnote-3-v3\.0\.1-macOS-Universal-2-Public-Test\.zip"/,
   );
-  assert.match(
-    html,
-    /download="bugnote-3-v3\.0\.1-macOS-Universal-2-Public-Test\.zip"/,
-  );
+  assert.doesNotMatch(html, /\sdownload=/);
   assert.match(html, /File verification/);
   assert.match(
     html,
@@ -252,32 +249,40 @@ test("server-renders the current DriftField and preserves the earlier interface 
   assert.match(html, /Back to plugin home/);
   assert.match(html, /href="\/"/);
   assert.match(html, /v0\.5\.1 · CURRENT DEVELOPMENT/);
-  assert.match(html, /macOS 12\+ \/ Universal 2/);
+  assert.match(html, /macOS 12\+ \/ Windows x64/);
   assert.match(html, /0\.5\.1 development/);
   assert.match(html, /Up to 64/);
   assert.match(html, /MUTE \/ REMOVE/);
   assert.match(html, /Growth/);
   assert.match(html, /MATCH/);
   assert.match(html, />Download</);
-  assert.match(html, /Test build/);
+  assert.ok((html.match(/Test build/g) ?? []).length >= 2);
   assert.match(html, /Download for macOS/);
+  assert.match(html, /Download for Windows/);
   assert.match(html, /9\.7 MB ZIP/);
+  assert.match(html, /3\.5 MB ZIP/);
   assert.match(
     html,
     /downloading, opening, or adding this test build to a DAW may be difficult/,
   );
   assert.match(
     html,
-    /href="\/downloads\/DriftField-0\.5\.1-macOS-Universal-VST3-Friend-Test\.zip"/,
+    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-03\/DriftField-0\.5\.1-macOS-Universal-VST3-Friend-Test\.zip"/,
   );
   assert.match(
     html,
-    /download="DriftField-0\.5\.1-macOS-Universal-VST3-Friend-Test\.zip"/,
+    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-03\/DriftField-0\.5\.1-Windows-x64-VST3-Friend-Test-CrossBuild\.zip"/,
   );
-  assert.match(html, /File verification/);
+  assert.match(html, /cross-build has not yet been tested on Windows/);
+  assert.doesNotMatch(html, /\sdownload=/);
+  assert.ok((html.match(/File verification/g) ?? []).length >= 2);
   assert.match(
     html,
     /4491467eb556b885752e55df3a89589d76ee66463b4712b861b911ed2ba796e8/,
+  );
+  assert.match(
+    html,
+    /614c41aae466747dc3315033bf123ab448ec533b4831e1750d4d247a021b4084/,
   );
   assert.match(
     html,
@@ -285,7 +290,11 @@ test("server-renders the current DriftField and preserves the earlier interface 
   );
   assert.equal(
     (html.match(/<a\b[^>]*\bdata-download-link\b/g) ?? []).length,
-    1,
+    2,
+  );
+  assert.ok(
+    html.indexOf("DriftField-0.5.1-macOS-Universal-VST3-Friend-Test.zip") <
+      html.indexOf("DriftField-0.5.1-Windows-x64-VST3-Friend-Test-CrossBuild.zip"),
   );
   assert.doesNotMatch(html, /Preparing release|Release build in preparation/);
   assert.doesNotMatch(
@@ -322,8 +331,6 @@ test("exports all routes, social metadata, and public test builds", async () => 
     seedHtml,
     netlifyConfig,
     driftFieldVideo,
-    bugnoteDownload,
-    driftFieldDownload,
   ] = await Promise.all([
     readFile(new URL("../dist/client/index.html", import.meta.url), "utf8"),
     readFile(new URL("../dist/client/plugins/bugnote-3.html", import.meta.url), "utf8"),
@@ -333,18 +340,6 @@ test("exports all routes, social metadata, and public test builds", async () => 
     readFile(
       new URL(
         "../dist/client/media/driftfield-interface-recording.mp4",
-        import.meta.url,
-      ),
-    ),
-    readFile(
-      new URL(
-        "../dist/client/downloads/bugnote-3-v3.0.1-macOS-Universal-2-Public-Test.zip",
-        import.meta.url,
-      ),
-    ),
-    readFile(
-      new URL(
-        "../dist/client/downloads/DriftField-0.5.1-macOS-Universal-VST3-Friend-Test.zip",
         import.meta.url,
       ),
     ),
@@ -364,16 +359,6 @@ test("exports all routes, social metadata, and public test builds", async () => 
   assert.match(seedHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/driftfield-interface-current\.png"\/>/);
   assert.match(netlifyConfig, /command\s*=\s*"npm test"/);
   assert.match(netlifyConfig, /\[build\.processing\.html\][\s\S]*pretty_urls\s*=\s*true/);
-  assert.equal(bugnoteDownload.byteLength, 22_590_104);
-  assert.equal(
-    createHash("sha256").update(bugnoteDownload).digest("hex"),
-    "c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094",
-  );
-  assert.equal(driftFieldDownload.byteLength, 9_681_335);
-  assert.equal(
-    createHash("sha256").update(driftFieldDownload).digest("hex"),
-    "4491467eb556b885752e55df3a89589d76ee66463b4712b861b911ed2ba796e8",
-  );
   assert.equal(driftFieldVideo.byteLength, 9_236_331);
   assert.equal(
     createHash("sha256").update(driftFieldVideo).digest("hex"),
@@ -613,11 +598,15 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(pluginData, /image:\s*"\/media\/driftfield-icon-tactile-splice\.png"/);
   assert.match(
     pluginData,
-    /id:\s*"bugnote-3-macos-universal-2"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:\s*"\/downloads\/bugnote-3-v3\.0\.1-macOS-Universal-2-Public-Test\.zip"[\s\S]*?bytes:\s*22_590_104[\s\S]*?c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094/,
+    /id:\s*"bugnote-3-macos-universal-2"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:[\s\S]*?"https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-03\/bugnote-3-v3\.0\.1-macOS-Universal-2-Public-Test\.zip"[\s\S]*?delivery:\s*"external-file"[\s\S]*?bytes:\s*22_590_104[\s\S]*?c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094/,
   );
   assert.match(
     pluginData,
-    /id:\s*"driftfield-macos-universal-2"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:\s*"\/downloads\/DriftField-0\.5\.1-macOS-Universal-VST3-Friend-Test\.zip"[\s\S]*?bytes:\s*9_681_335[\s\S]*?4491467eb556b885752e55df3a89589d76ee66463b4712b861b911ed2ba796e8/,
+    /id:\s*"driftfield-macos-universal-2"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:[\s\S]*?"https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-03\/DriftField-0\.5\.1-macOS-Universal-VST3-Friend-Test\.zip"[\s\S]*?delivery:\s*"external-file"[\s\S]*?bytes:\s*9_681_335[\s\S]*?4491467eb556b885752e55df3a89589d76ee66463b4712b861b911ed2ba796e8/,
+  );
+  assert.match(
+    pluginData,
+    /id:\s*"driftfield-windows-x64"[\s\S]*?platform:\s*"Windows"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:[\s\S]*?"https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-03\/DriftField-0\.5\.1-Windows-x64-VST3-Friend-Test-CrossBuild\.zip"[\s\S]*?delivery:\s*"external-file"[\s\S]*?bytes:\s*3_506_164[\s\S]*?614c41aae466747dc3315033bf123ab448ec533b4831e1750d4d247a021b4084/,
   );
   assert.match(pluginData, /previousVersions:\s*\[/);
   assert.match(pluginData, /id:\s*"bugnote-v0-4-2"/);
@@ -626,7 +615,7 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(detailView, /download\.availability !== "pending"/);
   assert.match(detailView, /data-download-link/);
   assert.match(detailView, /Test build/);
-  assert.match(detailView, /Download for macOS/);
+  assert.match(detailView, /"Download for " \+ download\.platform/);
   assert.match(detailView, /download\.delivery === "same-origin-file"/);
   assert.match(detailView, /target=\{/);
   assert.match(detailView, /rel=\{/);
@@ -642,6 +631,7 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(detailStyles, /\.scroll:focus-visible/);
   assert.match(detailStyles, /\.downloadLink:focus-visible/);
   assert.match(detailStyles, /min-height:\s*44px/);
+  assert.match(detailStyles, /\.downloadCard \+ \.downloadCard\s*\{[\s\S]*?margin-top:\s*10px/);
   assert.match(detailStyles, /\.candidateBadge/);
   assert.match(detailStyles, /\.candidateNote/);
   assert.match(detailStyles, /\.checksum summary:focus-visible/);
@@ -827,26 +817,4 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(driftFieldCaptions, /^WEBVTT/);
   assert.match(driftFieldCaptions, /DriftField interface and generated audio/);
 
-  const bugnoteDownload = await readFile(
-    new URL(
-      "../public/downloads/bugnote-3-v3.0.1-macOS-Universal-2-Public-Test.zip",
-      import.meta.url,
-    ),
-  );
-  assert.equal(bugnoteDownload.byteLength, 22_590_104);
-  assert.equal(
-    createHash("sha256").update(bugnoteDownload).digest("hex"),
-    "c45cd362f8ce6eb26f07a8333cdff66c40c161ee2de6d859e0704cc279297094",
-  );
-  const driftFieldDownload = await readFile(
-    new URL(
-      "../public/downloads/DriftField-0.5.1-macOS-Universal-VST3-Friend-Test.zip",
-      import.meta.url,
-    ),
-  );
-  assert.equal(driftFieldDownload.byteLength, 9_681_335);
-  assert.equal(
-    createHash("sha256").update(driftFieldDownload).digest("hex"),
-    "4491467eb556b885752e55df3a89589d76ee66463b4712b861b911ed2ba796e8",
-  );
 });
