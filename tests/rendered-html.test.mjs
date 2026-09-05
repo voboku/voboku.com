@@ -153,6 +153,8 @@ test("server-renders the SEED series as one grouped collection", async () => {
   assert.match(html, /<title>SEED Series — Sound Objects<\/title>/);
   assert.match(html, /SEED series page/);
   assert.match(html, /Back to plugin home/);
+  assert.match(html, /<h1[^>]+class="[^"]*srOnly[^"]*"[^>]*>SEED series<\/h1>/);
+  assert.doesNotMatch(html, /<h1 id="seed-series-title">SEED<\/h1>/);
   assert.match(html, /first completed instrument in the SEED series/);
   assert.equal((html.match(/role="listitem"/g) ?? []).length, 1);
   assert.match(html, /DriftField application icon/);

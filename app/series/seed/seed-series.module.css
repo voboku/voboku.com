@@ -86,11 +86,16 @@
   line-height: 1.55;
 }
 
-.intro h1 {
-  margin: 0 0 6px;
-  font-size: 38px;
-  font-weight: 400;
-  letter-spacing: -0.055em;
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .article h2 {
@@ -161,7 +166,4 @@
     margin-bottom: 16px;
   }
 
-  .intro h1 {
-    font-size: 31px;
-  }
 }

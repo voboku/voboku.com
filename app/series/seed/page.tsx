@@ -58,7 +58,7 @@ export default function SeedSeriesPage() {
         >
           <article className={styles.article}>
             <header className={styles.intro}>
-              <h1 id={titleId}>SEED</h1>
+              <h1 id={titleId} className={styles.srOnly}>SEED series</h1>
               <span>{seedSeries.description}</span>
             </header>
 
