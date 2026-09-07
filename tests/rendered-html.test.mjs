@@ -253,7 +253,7 @@ test("server-renders bugnote 3 with macOS and Windows public test downloads", as
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });
 
-test("server-renders Harmonic Terrain from the supplied icon without an empty download section", async () => {
+test("server-renders Harmonic Terrain with its macOS public test download", async () => {
   const response = await render("/plugins/harmonic-terrain");
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -267,15 +267,34 @@ test("server-renders Harmonic Terrain from the supplied icon without an empty do
   assert.match(html, /href="\/"/);
   assert.match(html, /v0\.10\.0 · DEVELOPMENT/);
   assert.match(html, /sample-only harmonic instrument/);
-  assert.match(html, /macOS 10\.13\+ · Apple Silicon \(arm64\)/);
+  assert.match(html, /macOS 11\+ · Apple Silicon \(arm64\)/);
   assert.match(html, /AU \/ VST3 \/ Standalone/);
   assert.match(html, /Up to 8/);
   assert.match(html, /Chords \/ progressions \/ melody/);
   assert.match(html, /Standard MIDI file \(\.mid\)/);
   assert.match(html, /Classic/);
   assert.match(html, /Texture/);
-  assert.doesNotMatch(html, />Download</);
-  assert.doesNotMatch(html, /data-download-link/);
+  assert.match(html, />Download</);
+  assert.match(html, /Test build/);
+  assert.match(html, /Download for macOS/);
+  assert.match(html, /6\.6 MB ZIP/);
+  assert.match(html, /ad-hoc signed and not notarized/);
+  assert.match(html, /manual installation or system approval may be required/);
+  assert.match(html, /FlowerHarmonic filenames/);
+  assert.match(
+    html,
+    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Harmonic-Terrain-v0\.10\.0-macOS-arm64\.zip"/,
+  );
+  assert.doesNotMatch(html, /\sdownload=/);
+  assert.match(html, /File verification/);
+  assert.match(
+    html,
+    /71ea7bcccfda8f5e22819fd9e4a4f2b56a65881b1d391b37f3f8338336406a55/,
+  );
+  assert.equal(
+    (html.match(/<a\b[^>]*\bdata-download-link\b/g) ?? []).length,
+    1,
+  );
   assert.doesNotMatch(html, /<video\b|<audio\b/);
   assert.doesNotMatch(html, /Preparing release|Release build in preparation/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
@@ -425,6 +444,7 @@ test("exports all routes, social metadata, and public test builds", async () => 
   assert.match(harmonicTerrainHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/harmonic-terrain\/"\/>/);
   assert.match(harmonicTerrainHtml, /<meta property="og:title" content="Harmonic Terrain — Sound Objects"\/>/);
   assert.match(harmonicTerrainHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/harmonic-terrain-icon\.png"\/>/);
+  assert.match(harmonicTerrainHtml, /https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Harmonic-Terrain-v0\.10\.0-macOS-arm64\.zip/);
   assert.match(driftFieldHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/driftfield\/"\/>/);
   assert.match(driftFieldHtml, /<meta property="og:title" content="DriftField — Sound Objects"\/>/);
   assert.match(driftFieldHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/driftfield-interface-current\.png"\/>/);
@@ -674,7 +694,10 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
     pluginData.match(/export const harmonicTerrain:[\s\S]*?\n\};/)?.[0] ?? "";
   assert.match(harmonicTerrainSource, /title:\s*"Harmonic Terrain"/);
   assert.match(harmonicTerrainSource, /icon:\s*"\/media\/harmonic-terrain-icon\.png"/);
-  assert.match(harmonicTerrainSource, /downloads:\s*\[\]/);
+  assert.match(
+    harmonicTerrainSource,
+    /id:\s*"harmonic-terrain-macos-arm64"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:[\s\S]*?"https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Harmonic-Terrain-v0\.10\.0-macOS-arm64\.zip"[\s\S]*?delivery:\s*"external-file"[\s\S]*?bytes:\s*6_573_315[\s\S]*?71ea7bcccfda8f5e22819fd9e4a4f2b56a65881b1d391b37f3f8338336406a55/,
+  );
   assert.match(pluginData, /icon:\s*"\/media\/driftfield-icon-soft-sequence\.png"/);
   assert.match(pluginData, /interfaceImage:\s*"\/media\/driftfield-interface-current\.png"/);
   assert.match(pluginData, /id:\s*"driftfield-v0-5-1-tactile-splice"/);

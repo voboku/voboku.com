@@ -296,7 +296,7 @@ export const harmonicTerrain: PluginDetail = {
   description:
     "A sample-only harmonic instrument that turns up to eight local recordings into playable chords, scale-locked melodies and MIDI exports.",
   statusNote:
-    "This page introduces the current Harmonic Terrain development identity. No public plug-in download is included.",
+    "Current Apple Silicon test build. Package integrity, ad-hoc signatures, automated tests and AU validation passed locally; FL Studio use and listening approval remain unverified.",
   icon: "/media/harmonic-terrain-icon.png",
   interfaceImage: "/media/harmonic-terrain-icon.png",
   interfaceAlt: "The lavender curve icon of Harmonic Terrain",
@@ -306,7 +306,7 @@ export const harmonicTerrain: PluginDetail = {
   accent: "#8b7cf6",
   mediaBackground: "#f0efff",
   facts: [
-    { label: "System", value: "macOS 10.13+ · Apple Silicon (arm64)" },
+    { label: "System", value: "macOS 11+ · Apple Silicon (arm64)" },
     { label: "Formats", value: "AU / VST3 / Standalone" },
     { label: "Samples", value: "Up to 8" },
     { label: "Type", value: "Sample-only instrument" },
@@ -314,7 +314,25 @@ export const harmonicTerrain: PluginDetail = {
     { label: "Export", value: "Standard MIDI file (.mid)" },
   ],
   gestures: ["Classic", "Grain", "Stretch", "Reverse", "Loop", "Texture"],
-  downloads: [],
+  downloads: [
+    {
+      id: "harmonic-terrain-macos-arm64",
+      platform: "macOS",
+      label: "macOS Apple Silicon · AU / VST3 / Standalone",
+      meta:
+        "v0.10.0 · macOS 11+ · Apple Silicon (arm64) · AU / VST3 / Standalone · 6.6 MB ZIP",
+      note:
+        "This development build is ad-hoc signed and not notarized. macOS may block opening or plug-in scanning, and manual installation or system approval may be required. The included bundles retain the FlowerHarmonic filenames for host-project compatibility.",
+      availability: "candidate",
+      href:
+        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-08/Harmonic-Terrain-v0.10.0-macOS-arm64.zip",
+      delivery: "external-file",
+      filename: "Harmonic-Terrain-v0.10.0-macOS-arm64.zip",
+      bytes: 6_573_315,
+      sha256:
+        "71ea7bcccfda8f5e22819fd9e4a4f2b56a65881b1d391b37f3f8338336406a55",
+    },
+  ],
   videos: [],
   samplePacks: [],
   tracks: [],
