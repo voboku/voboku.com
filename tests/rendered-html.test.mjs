@@ -41,11 +41,14 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /aria-label="Lock Sound Objects"/);
   assert.doesNotMatch(html, /Opening Sound Objects/);
   assert.match(html, /Available sound objects/);
-  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 3);
+  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 4);
   assert.match(html, /\/media\/driftfield-icon-soft-sequence\.png/);
   assert.match(html, /\/media\/bugnote-3-icon\.png/);
+  assert.match(html, /\/media\/harmonic-terrain-icon\.png/);
   assert.doesNotMatch(html, /href="\/plugins\/driftfield"/);
   assert.match(html, /href="\/plugins\/bugnote-3"/);
+  assert.match(html, /href="\/plugins\/harmonic-terrain"/);
+  assert.match(html, /Open Harmonic Terrain/);
   assert.match(html, /href="\/series\/seed"/);
   assert.match(html, /Open SEED series/);
   assert.match(html, /href="\/applications"/);
@@ -250,6 +253,34 @@ test("server-renders bugnote 3 with macOS and Windows public test downloads", as
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });
 
+test("server-renders Harmonic Terrain from the supplied icon without an empty download section", async () => {
+  const response = await render("/plugins/harmonic-terrain");
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+
+  const html = await response.text();
+  assert.match(html, /<title>Harmonic Terrain — Sound Objects<\/title>/);
+  assert.match(html, /Harmonic Terrain plugin page/);
+  assert.match(html, /\/media\/harmonic-terrain-icon\.png/);
+  assert.match(html, /The lavender curve icon of Harmonic Terrain/);
+  assert.match(html, /Back to plugin home/);
+  assert.match(html, /href="\/"/);
+  assert.match(html, /v0\.10\.0 · DEVELOPMENT/);
+  assert.match(html, /sample-only harmonic instrument/);
+  assert.match(html, /macOS 10\.13\+ · Apple Silicon \(arm64\)/);
+  assert.match(html, /AU \/ VST3 \/ Standalone/);
+  assert.match(html, /Up to 8/);
+  assert.match(html, /Chords \/ progressions \/ melody/);
+  assert.match(html, /Standard MIDI file \(\.mid\)/);
+  assert.match(html, /Classic/);
+  assert.match(html, /Texture/);
+  assert.doesNotMatch(html, />Download</);
+  assert.doesNotMatch(html, /data-download-link/);
+  assert.doesNotMatch(html, /<video\b|<audio\b/);
+  assert.doesNotMatch(html, /Preparing release|Release build in preparation/);
+  assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
+});
+
 test("server-renders the current DriftField and preserves the earlier interface below", async () => {
   const response = await render("/plugins/driftfield");
   assert.equal(response.status, 200);
@@ -345,6 +376,7 @@ test("exports all routes, social metadata, and public test builds", async () => 
   const [
     rootHtml,
     bugnoteHtml,
+    harmonicTerrainHtml,
     driftFieldHtml,
     seedHtml,
     netlifyConfig,
@@ -354,6 +386,10 @@ test("exports all routes, social metadata, and public test builds", async () => 
   ] = await Promise.all([
     readFile(new URL("../dist/client/index.html", import.meta.url), "utf8"),
     readFile(new URL("../dist/client/plugins/bugnote-3.html", import.meta.url), "utf8"),
+    readFile(
+      new URL("../dist/client/plugins/harmonic-terrain.html", import.meta.url),
+      "utf8",
+    ),
     readFile(new URL("../dist/client/plugins/driftfield.html", import.meta.url), "utf8"),
     readFile(new URL("../dist/client/series/seed.html", import.meta.url), "utf8"),
     readFile(new URL("../netlify.toml", import.meta.url), "utf8"),
@@ -386,6 +422,9 @@ test("exports all routes, social metadata, and public test builds", async () => 
   assert.match(bugnoteHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/bugnote-3\/"\/>/);
   assert.match(bugnoteHtml, /<meta property="og:title" content="bugnote 3 — Sound Objects"\/>/);
   assert.match(bugnoteHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/bugnote-3-ui\.jpg"\/>/);
+  assert.match(harmonicTerrainHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/harmonic-terrain\/"\/>/);
+  assert.match(harmonicTerrainHtml, /<meta property="og:title" content="Harmonic Terrain — Sound Objects"\/>/);
+  assert.match(harmonicTerrainHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/harmonic-terrain-icon\.png"\/>/);
   assert.match(driftFieldHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/driftfield\/"\/>/);
   assert.match(driftFieldHtml, /<meta property="og:title" content="DriftField — Sound Objects"\/>/);
   assert.match(driftFieldHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/driftfield-interface-current\.png"\/>/);
@@ -630,6 +669,12 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.doesNotMatch(layout, /codex-preview|_sites-preview/);
   assert.match(pluginData, /detailHref:\s*"\/plugins\/driftfield"/);
   assert.match(pluginData, /detailHref:\s*"\/plugins\/bugnote-3"/);
+  assert.match(pluginData, /detailHref:\s*"\/plugins\/harmonic-terrain"/);
+  const harmonicTerrainSource =
+    pluginData.match(/export const harmonicTerrain:[\s\S]*?\n\};/)?.[0] ?? "";
+  assert.match(harmonicTerrainSource, /title:\s*"Harmonic Terrain"/);
+  assert.match(harmonicTerrainSource, /icon:\s*"\/media\/harmonic-terrain-icon\.png"/);
+  assert.match(harmonicTerrainSource, /downloads:\s*\[\]/);
   assert.match(pluginData, /icon:\s*"\/media\/driftfield-icon-soft-sequence\.png"/);
   assert.match(pluginData, /interfaceImage:\s*"\/media\/driftfield-interface-current\.png"/);
   assert.match(pluginData, /id:\s*"driftfield-v0-5-1-tactile-splice"/);
@@ -653,6 +698,7 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(pluginData, /previousVersions:\s*\[/);
   assert.match(pluginData, /id:\s*"bugnote-v0-4-2"/);
   assert.match(detailView, /plugin\.previousVersions\?\.length/);
+  assert.match(detailView, /plugin\.downloads\.length > 0/);
   assert.match(detailView, />Previous version</);
   assert.match(detailView, /download\.availability !== "pending"/);
   assert.match(detailView, /data-download-link/);
@@ -716,6 +762,7 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
     ),
     access(new URL("../public/media/bugnote-3-ui.jpg", import.meta.url)),
     access(new URL("../public/media/bugnote-3-icon.png", import.meta.url)),
+    access(new URL("../public/media/harmonic-terrain-icon.png", import.meta.url)),
     access(new URL("../public/media/bugnote-legacy-icon.png", import.meta.url)),
     access(new URL("../public/media/bugnote-interface-recording.mp4", import.meta.url)),
     access(
@@ -742,6 +789,28 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
 
   const bugnoteIcon = await stat(new URL("../public/media/bugnote-3-icon.png", import.meta.url));
   assert.ok(bugnoteIcon.size < 200_000, "bugnote icon should stay lightweight");
+  const harmonicTerrainIconUrl = new URL(
+    "../public/media/harmonic-terrain-icon.png",
+    import.meta.url,
+  );
+  const harmonicTerrainIcon = await stat(harmonicTerrainIconUrl);
+  assert.equal(harmonicTerrainIcon.size, 67_534);
+  assert.ok(
+    harmonicTerrainIcon.size < 200_000,
+    "Harmonic Terrain icon should stay lightweight",
+  );
+  const harmonicTerrainIconBytes = await readFile(harmonicTerrainIconUrl);
+  assert.equal(
+    createHash("sha256").update(harmonicTerrainIconBytes).digest("hex"),
+    "9e5de45cd9c83b6197e79e14d5526bb3980b2e8bef61635425d621a2f68ad5ab",
+  );
+  const exportedHarmonicTerrainIconBytes = await readFile(
+    new URL("../dist/client/media/harmonic-terrain-icon.png", import.meta.url),
+  );
+  assert.equal(
+    createHash("sha256").update(exportedHarmonicTerrainIconBytes).digest("hex"),
+    "9e5de45cd9c83b6197e79e14d5526bb3980b2e8bef61635425d621a2f68ad5ab",
+  );
   const legacyBugnoteIcon = await stat(
     new URL("../public/media/bugnote-legacy-icon.png", import.meta.url),
   );

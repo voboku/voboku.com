@@ -97,6 +97,7 @@ export function PluginDetailView({ plugin }: PluginDetailViewProps) {
               </section>
             ) : null}
 
+            {plugin.downloads.length > 0 ? (
             <section
               className={styles.downloads}
               aria-labelledby={plugin.slug + "-downloads"}
@@ -184,6 +185,7 @@ export function PluginDetailView({ plugin }: PluginDetailViewProps) {
                 );
               })}
             </section>
+            ) : null}
 
             <section aria-labelledby={informationId}>
               <h2 className={styles.visuallyHidden} id={informationId}>

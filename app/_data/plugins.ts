@@ -156,6 +156,15 @@ export const pluginWorks = [
     alt: "Flower Groove plugin interface",
     detailHref: null,
   },
+  {
+    id: "harmonic-terrain",
+    name: "Harmonic Terrain",
+    archiveSection: "harmonic-terrain",
+    src: "/media/harmonic-terrain-icon.png",
+    iconSrc: "/media/harmonic-terrain-icon.png",
+    alt: "Harmonic Terrain application icon",
+    detailHref: "/plugins/harmonic-terrain",
+  },
 ] as const;
 
 export const seedSeries = {
@@ -277,6 +286,38 @@ export const bugnote3: PluginDetail = {
   videos: [] as readonly PluginVideo[],
   samplePacks: [] as readonly SamplePack[],
   tracks: [] as readonly PluginTrack[],
+};
+
+export const harmonicTerrain: PluginDetail = {
+  slug: "harmonic-terrain",
+  archiveSection: "harmonic-terrain",
+  title: "Harmonic Terrain",
+  version: "v0.10.0 · DEVELOPMENT",
+  description:
+    "A sample-only harmonic instrument that turns up to eight local recordings into playable chords, scale-locked melodies and MIDI exports.",
+  statusNote:
+    "This page introduces the current Harmonic Terrain development identity. No public plug-in download is included.",
+  icon: "/media/harmonic-terrain-icon.png",
+  interfaceImage: "/media/harmonic-terrain-icon.png",
+  interfaceAlt: "The lavender curve icon of Harmonic Terrain",
+  interfaceWidth: 256,
+  interfaceHeight: 256,
+  mediaPresentation: "icon",
+  accent: "#8b7cf6",
+  mediaBackground: "#f0efff",
+  facts: [
+    { label: "System", value: "macOS 10.13+ · Apple Silicon (arm64)" },
+    { label: "Formats", value: "AU / VST3 / Standalone" },
+    { label: "Samples", value: "Up to 8" },
+    { label: "Type", value: "Sample-only instrument" },
+    { label: "Composition", value: "Chords / progressions / melody" },
+    { label: "Export", value: "Standard MIDI file (.mid)" },
+  ],
+  gestures: ["Classic", "Grain", "Stretch", "Reverse", "Loop", "Texture"],
+  downloads: [],
+  videos: [],
+  samplePacks: [],
+  tracks: [],
 };
 
 export const driftField: PluginDetail = {
