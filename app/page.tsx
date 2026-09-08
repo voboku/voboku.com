@@ -330,6 +330,7 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
               className="plugin-app"
               href={work.detailHref ?? "/"}
               aria-label={"Open " + work.name}
+              title={work.name}
               key={work.id}
             >
               <span className="plugin-app-icon">
@@ -357,7 +358,7 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
                 />
               ))}
             </span>
-            <span>{webApplications.name}</span>
+            <span title={webApplications.name}>Web Apps</span>
           </a>
         </nav>
       </div>

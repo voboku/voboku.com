@@ -41,7 +41,7 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /aria-label="Lock Sound Objects"/);
   assert.doesNotMatch(html, /Opening Sound Objects/);
   assert.match(html, /Available sound objects/);
-  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 5);
+  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 6);
   assert.match(html, /\/media\/driftfield-icon-soft-sequence\.png/);
   assert.match(html, /\/media\/bugnote-3-icon\.png/);
   assert.match(html, /\/media\/harmonic-terrain-icon\.png/);
@@ -51,11 +51,14 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /Open Harmonic Terrain/);
   assert.match(html, /href="\/plugins\/orbitonic"/);
   assert.match(html, /Open Orbitonic/);
+  assert.match(html, /href="\/plugins\/converge"/);
+  assert.match(html, /Open Converge/);
+  assert.match(html, /\/media\/converge-icon\.png/);
   assert.match(html, /href="\/series\/seed"/);
   assert.match(html, /Open SEED series/);
   assert.match(html, /href="\/applications"/);
   assert.match(html, /Open web applications/);
-  assert.match(html, /<span>Web Applications<\/span>/);
+  assert.match(html, /<span title="Web Applications">Web Apps<\/span>/);
   assert.doesNotMatch(html, /href="\/instruments\/(?:imagescansound|orbitonic)"/);
   assert.doesNotMatch(html, /<span>\s*(?:imagescansound|orbitonic)\s*<\/span>/);
   assert.match(html, /\/media\/imagescansound-icon\.svg/);
@@ -70,6 +73,29 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.doesNotMatch(html, /release-widget|IN DEVELOPMENT/);
   assert.doesNotMatch(html, /Open (?:COLONY|Ecosystem Drums|Flower Groove|Archive)/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
+});
+
+test("keeps the home icons in an iPhone-style four-column grid", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const grid = css.match(/\.plugin-apps\s*\{([^}]+)\}/)?.[1] ?? "";
+  const icon = css.match(/\.plugin-app-icon\s*\{([^}]+)\}/)?.[1] ?? "";
+  const label = css.match(/\.plugin-app > span:last-child\s*\{([^}]+)\}/)?.[1] ?? "";
+  assert.match(grid, /width:\s*100%/);
+  assert.match(grid, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
+  assert.match(grid, /column-gap:\s*8px/);
+  assert.match(grid, /row-gap:\s*22px/);
+  assert.match(icon, /width:\s*min\(54px, 100%\)/);
+  assert.match(icon, /aspect-ratio:\s*1/);
+  assert.match(label, /font-size:\s*12px/);
+  assert.match(label, /overflow-wrap:\s*anywhere/);
+  // Available cell widths stay above the 44 px touch target on phone widths.
+  for (const viewport of [320, 375, 390, 430]) {
+    const device = Math.min(viewport - 16, 316);
+    assert.ok((device - 2 - 34 - 3 * 8) / 4 >= 44);
+  }
+  const html = await (await render()).text();
+  assert.ok(html.indexOf('href="/plugins/orbitonic"') < html.indexOf('href="/plugins/converge"'));
+  assert.ok(html.indexOf('href="/plugins/converge"') < html.indexOf('href="/applications"'));
 });
 
 test("server-renders the web applications as one textless collection", async () => {
@@ -358,6 +384,43 @@ test("server-renders Orbitonic with macOS and Windows native test downloads", as
   assert.doesNotMatch(html, /<video\b|<audio\b/);
   assert.doesNotMatch(html, /Preparing release|Release build in preparation/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
+});
+
+test("publishes Converge details with the verified macOS file and original assets", async () => {
+  const response = await render("/plugins/converge");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /<title>Converge<\/title>/);
+  assert.match(html, /Converge plugin page/);
+  assert.match(html, /v0\.4\.0 · LIVE PULL/);
+  assert.match(html, /Pull \/ Burst \/ Ripple \/ Bounce/);
+  assert.match(html, /128 files · Up to 4 sources in one mix/);
+  assert.match(html, /macOS 11\+ · Apple Silicon \/ Intel/);
+  assert.match(html, /AU \/ VST3 \/ Standalone · Universal 2/);
+  assert.match(html, /22\.3 MB ZIP/);
+  assert.match(html, /Ad-hoc signed and not notarized/);
+  assert.match(html, /Download for macOS/);
+  assert.doesNotMatch(html, /Download for Windows|Preparing release/);
+  assert.equal((html.match(/<a\b[^>]*\bdata-download-link\b/g) ?? []).length, 1);
+  assert.match(html, /https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Converge-v0\.4\.0-macOS-Universal\.zip/);
+  assert.match(html, /437f32192e7676706110500934556a6351a717bf0e7932d1a29e22e4ade4aaaf/);
+  assert.match(html, /Back to plugin home/);
+  const exported = await readFile(new URL("../dist/client/plugins/converge.html", import.meta.url), "utf8");
+  assert.match(exported, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/converge\/"\/>/);
+  assert.match(exported, /Converge-v0\.4\.0-macOS-Universal\.zip/);
+  for (const [file, bytes, sha256, width, height] of [
+    ["converge-icon.png", 950210, "9013ccff1f5287936e9a506be3f2afe264d539477fbef66ecc126eb4784b2d04", 1024, 1024],
+    ["converge-interface-v0-4.png", 183232, "2ef01ff654578d0659eff234b9b843c3ef100beaee646b0ce1f02ccf9aa5da92", 960, 720],
+  ]) {
+    const source = await readFile(new URL(`../public/media/${file}`, import.meta.url));
+    const output = await readFile(new URL(`../dist/client/media/${file}`, import.meta.url));
+    assert.equal(source.byteLength, bytes);
+    assert.equal(source.readUInt32BE(16), width);
+    assert.equal(source.readUInt32BE(20), height);
+    assert.equal(createHash("sha256").update(source).digest("hex"), sha256);
+    assert.deepEqual(source, output);
+    assert.ok(html.includes(`/media/${file}`));
+  }
 });
 
 test("server-renders the current DriftField and preserves the earlier interface below", async () => {

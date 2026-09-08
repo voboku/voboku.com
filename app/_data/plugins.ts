@@ -174,6 +174,15 @@ export const pluginWorks = [
     alt: "Orbitonic native plugin interface",
     detailHref: "/plugins/orbitonic",
   },
+  {
+    id: "converge",
+    name: "Converge",
+    archiveSection: "converge",
+    src: "/media/converge-interface-v0-4.png",
+    iconSrc: "/media/converge-icon.png",
+    alt: "Converge sampler with pullable ivory rings",
+    detailHref: "/plugins/converge",
+  },
 ] as const;
 
 export const seedSeries = {
@@ -410,6 +419,56 @@ export const orbitonic: PluginDetail = {
       bytes: 9_135_852,
       sha256:
         "9f61acb70abb59b51b9ea3f57caf92ae49e49eec321e42c997154ab86e5fed9d",
+    },
+  ],
+  videos: [],
+  samplePacks: [],
+  tracks: [],
+};
+
+export const converge: PluginDetail = {
+  slug: "converge",
+  archiveSection: "converge",
+  title: "Converge",
+  version: "v0.4.0 · LIVE PULL",
+  description:
+    "Pull the rings to scatter chopped sound and blend up to four samples. Choose Pull, Burst, Ripple or Bounce, then hold the gesture or let it spring back.",
+  statusNote:
+    "Public macOS test build. Ad-hoc signed and not notarized; real DAW use of this version and listening approval remain unverified.",
+  icon: "/media/converge-icon.png",
+  interfaceImage: "/media/converge-interface-v0-4.png",
+  interfaceAlt:
+    "The native Converge sampler with pullable ivory rings, four pattern controls and a sample bank on a tan background",
+  interfaceWidth: 960,
+  interfaceHeight: 720,
+  mediaPresentation: "interface",
+  accent: "#7c6041",
+  mediaBackground: "#c3a47d",
+  facts: [
+    { label: "System", value: "macOS 11+ · Apple Silicon / Intel" },
+    { label: "Formats", value: "AU / VST3 / Standalone · Universal 2" },
+    { label: "Patterns", value: "Pull / Burst / Ripple / Bounce" },
+    { label: "Sample bank", value: "128 files · Up to 4 sources in one mix" },
+    { label: "Samples", value: "WAV / AIFF · Up to 60 seconds per file" },
+    { label: "Play", value: "MIDI / Computer keyboard / Audition" },
+  ],
+  gestures: ["PULL", "BURST", "RIPPLE", "BOUNCE", "HOLD", "MIX"],
+  downloads: [
+    {
+      id: "converge-macos-universal-2",
+      platform: "macOS",
+      label: "macOS Universal 2 · AU / VST3 / Standalone",
+      meta: "v0.4.0 · macOS 11+ · Apple Silicon / Intel · 22.3 MB ZIP",
+      note:
+        "Ad-hoc signed and not notarized. macOS may require approval before opening or scanning the plug-in. Includes installation instructions; sample audio is not embedded in saved projects, so keep your original samples available.",
+      availability: "candidate",
+      href:
+        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-08/Converge-v0.4.0-macOS-Universal.zip",
+      delivery: "external-file",
+      filename: "Converge-v0.4.0-macOS-Universal.zip",
+      bytes: 22_266_432,
+      sha256:
+        "437f32192e7676706110500934556a6351a717bf0e7932d1a29e22e4ade4aaaf",
     },
   ],
   videos: [],
