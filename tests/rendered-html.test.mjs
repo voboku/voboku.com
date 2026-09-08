@@ -311,9 +311,9 @@ test("server-renders Orbitonic with macOS and Windows native test downloads", as
   assert.match(html, /<title>Orbitonic — Sound Objects<\/title>/);
   assert.match(html, /Orbitonic plugin page/);
   assert.match(html, /\/media\/orbitonic-icon\.svg/);
-  assert.match(html, /\/media\/orbitonic-native-interface\.png/);
+  assert.match(html, /\/media\/orbitonic-native-interface-v0-1-1\.png/);
   assert.match(html, /Back to plugin home/);
-  assert.match(html, /v0\.1\.0 · NATIVE TEST BUILD/);
+  assert.match(html, /v0\.1\.1 · NATIVE TEST BUILD/);
   assert.match(html, /sample-first orbital rhythm instrument/);
   assert.match(html, /macOS 11\+ \/ Windows x64/);
   assert.match(
@@ -327,33 +327,33 @@ test("server-renders Orbitonic with macOS and Windows native test downloads", as
   assert.ok((html.match(/Test build/g) ?? []).length >= 2);
   assert.match(html, /Download for macOS/);
   assert.match(html, /Download for Windows/);
-  assert.match(html, /24\.9 MB ZIP/);
-  assert.match(html, /8\.7 MB ZIP/);
+  assert.match(html, /26\.1 MB ZIP/);
+  assert.match(html, /9\.1 MB ZIP/);
   assert.match(html, /ad-hoc signed and not notarized/);
   assert.match(html, /Windows x64 cross-build is unsigned/);
   assert.match(
     html,
-    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Orbitonic-v0\.1\.0-macOS-Universal2-AU-VST3-Standalone\.zip"/,
+    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Orbitonic-v0\.1\.1-macOS-Universal2-AU-VST3-Standalone\.zip"/,
   );
   assert.match(
     html,
-    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Orbitonic-v0\.1\.0-Windows-x64-VST3-Standalone\.zip"/,
+    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Orbitonic-v0\.1\.1-Windows-x64-VST3-Standalone\.zip"/,
   );
   assert.match(
     html,
-    /9f70ba4d0948bdf7c529dab525bd90361859afccc1133ab6399babc48ab0f237/,
+    /b545036e917a7ecd85c3f6be80dc0d95c0f402012e062fa35d7579e7c9c1fceb/,
   );
   assert.match(
     html,
-    /51e6445385e0d4f0b0c254792387076d251226fced68293519f8d74f69c1d59a/,
+    /9f61acb70abb59b51b9ea3f57caf92ae49e49eec321e42c997154ab86e5fed9d/,
   );
   assert.equal(
     (html.match(/<a\b[^>]*\bdata-download-link\b/g) ?? []).length,
     2,
   );
   assert.ok(
-    html.indexOf("Orbitonic-v0.1.0-macOS-Universal2-AU-VST3-Standalone.zip") <
-      html.indexOf("Orbitonic-v0.1.0-Windows-x64-VST3-Standalone.zip"),
+    html.indexOf("Orbitonic-v0.1.1-macOS-Universal2-AU-VST3-Standalone.zip") <
+      html.indexOf("Orbitonic-v0.1.1-Windows-x64-VST3-Standalone.zip"),
   );
   assert.doesNotMatch(html, /<video\b|<audio\b/);
   assert.doesNotMatch(html, /Preparing release|Release build in preparation/);
@@ -484,9 +484,9 @@ test("exports all routes, social metadata, and public test builds", async () => 
     ),
     readFile(new URL("../public/og-white-20260905.png", import.meta.url)),
     readFile(new URL("../dist/client/og-white-20260905.png", import.meta.url)),
-    readFile(new URL("../public/media/orbitonic-native-interface.png", import.meta.url)),
+    readFile(new URL("../public/media/orbitonic-native-interface-v0-1-1.png", import.meta.url)),
     readFile(
-      new URL("../dist/client/media/orbitonic-native-interface.png", import.meta.url),
+      new URL("../dist/client/media/orbitonic-native-interface-v0-1-1.png", import.meta.url),
     ),
   ]);
 
@@ -515,18 +515,18 @@ test("exports all routes, social metadata, and public test builds", async () => 
   assert.match(harmonicTerrainHtml, /https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Harmonic-Terrain-v0\.10\.0-macOS-arm64\.zip/);
   assert.match(orbitonicHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/orbitonic\/"\/>/);
   assert.match(orbitonicHtml, /<meta property="og:title" content="Orbitonic — Sound Objects"\/>/);
-  assert.match(orbitonicHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/orbitonic-native-interface\.png"\/>/);
-  assert.match(orbitonicHtml, /Orbitonic-v0\.1\.0-macOS-Universal2-AU-VST3-Standalone\.zip/);
-  assert.match(orbitonicHtml, /Orbitonic-v0\.1\.0-Windows-x64-VST3-Standalone\.zip/);
-  assert.equal(orbitonicInterfaceSource.byteLength, 111_142);
+  assert.match(orbitonicHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/orbitonic-native-interface-v0-1-1\.png"\/>/);
+  assert.match(orbitonicHtml, /Orbitonic-v0\.1\.1-macOS-Universal2-AU-VST3-Standalone\.zip/);
+  assert.match(orbitonicHtml, /Orbitonic-v0\.1\.1-Windows-x64-VST3-Standalone\.zip/);
+  assert.equal(orbitonicInterfaceSource.byteLength, 74_004);
   assert.equal(orbitonicInterfaceExport.byteLength, orbitonicInterfaceSource.byteLength);
   assert.equal(
     createHash("sha256").update(orbitonicInterfaceSource).digest("hex"),
-    "e41a288f9614e692cc38809b706564b27a2e2f7a1de90e555f2ae70cbc61969c",
+    "bccc14d53c5c6c59c5e794d8f895816889bdc794ed91aa166872779b7d4970c1",
   );
   assert.equal(
     createHash("sha256").update(orbitonicInterfaceExport).digest("hex"),
-    "e41a288f9614e692cc38809b706564b27a2e2f7a1de90e555f2ae70cbc61969c",
+    "bccc14d53c5c6c59c5e794d8f895816889bdc794ed91aa166872779b7d4970c1",
   );
   assert.match(driftFieldHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/driftfield\/"\/>/);
   assert.match(driftFieldHtml, /<meta property="og:title" content="DriftField — Sound Objects"\/>/);
@@ -788,11 +788,11 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(orbitonicSource, /icon:\s*"\/media\/orbitonic-icon\.svg"/);
   assert.match(
     orbitonicSource,
-    /id:\s*"orbitonic-macos-universal-2"[\s\S]*?availability:\s*"candidate"[\s\S]*?Orbitonic-v0\.1\.0-macOS-Universal2-AU-VST3-Standalone\.zip[\s\S]*?bytes:\s*24_894_208[\s\S]*?9f70ba4d0948bdf7c529dab525bd90361859afccc1133ab6399babc48ab0f237/,
+    /id:\s*"orbitonic-macos-universal-2"[\s\S]*?availability:\s*"candidate"[\s\S]*?Orbitonic-v0\.1\.1-macOS-Universal2-AU-VST3-Standalone\.zip[\s\S]*?bytes:\s*26_104_877[\s\S]*?b545036e917a7ecd85c3f6be80dc0d95c0f402012e062fa35d7579e7c9c1fceb/,
   );
   assert.match(
     orbitonicSource,
-    /id:\s*"orbitonic-windows-x64"[\s\S]*?platform:\s*"Windows"[\s\S]*?availability:\s*"candidate"[\s\S]*?Orbitonic-v0\.1\.0-Windows-x64-VST3-Standalone\.zip[\s\S]*?bytes:\s*8_731_251[\s\S]*?51e6445385e0d4f0b0c254792387076d251226fced68293519f8d74f69c1d59a/,
+    /id:\s*"orbitonic-windows-x64"[\s\S]*?platform:\s*"Windows"[\s\S]*?availability:\s*"candidate"[\s\S]*?Orbitonic-v0\.1\.1-Windows-x64-VST3-Standalone\.zip[\s\S]*?bytes:\s*9_135_852[\s\S]*?9f61acb70abb59b51b9ea3f57caf92ae49e49eec321e42c997154ab86e5fed9d/,
   );
   assert.match(pluginData, /icon:\s*"\/media\/driftfield-icon-soft-sequence\.png"/);
   assert.match(pluginData, /interfaceImage:\s*"\/media\/driftfield-interface-current\.png"/);
@@ -882,7 +882,7 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
     access(new URL("../public/media/bugnote-3-ui.jpg", import.meta.url)),
     access(new URL("../public/media/bugnote-3-icon.png", import.meta.url)),
     access(new URL("../public/media/harmonic-terrain-icon.png", import.meta.url)),
-    access(new URL("../public/media/orbitonic-native-interface.png", import.meta.url)),
+    access(new URL("../public/media/orbitonic-native-interface-v0-1-1.png", import.meta.url)),
     access(new URL("../public/media/bugnote-legacy-icon.png", import.meta.url)),
     access(new URL("../public/media/bugnote-interface-recording.mp4", import.meta.url)),
     access(

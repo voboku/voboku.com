@@ -169,7 +169,7 @@ export const pluginWorks = [
     id: "orbitonic-native",
     name: "Orbitonic",
     archiveSection: "orbitonic",
-    src: "/media/orbitonic-native-interface.png",
+    src: "/media/orbitonic-native-interface-v0-1-1.png",
     iconSrc: "/media/orbitonic-icon.svg",
     alt: "Orbitonic native plugin interface",
     detailHref: "/plugins/orbitonic",
@@ -351,20 +351,20 @@ export const orbitonic: PluginDetail = {
   slug: "orbitonic",
   archiveSection: "orbitonic",
   title: "Orbitonic",
-  version: "v0.1.0 · NATIVE TEST BUILD",
+  version: "v0.1.1 · NATIVE TEST BUILD",
   description:
     "A sample-first orbital rhythm instrument where planets, gates and collisions turn movement into sound.",
   statusNote:
-    "Current native test build. Automated macOS tests, Universal 2 builds and direct VST3 host checks passed locally; real DAW use, Windows execution, listening approval and production signing remain unverified.",
+    "Native test build with the original web interface layout and typography. Automated macOS tests and Universal 2 builds passed locally; real DAW use, Windows execution, listening approval and production signing remain unverified.",
   icon: "/media/orbitonic-icon.svg",
-  interfaceImage: "/media/orbitonic-native-interface.png",
+  interfaceImage: "/media/orbitonic-native-interface-v0-1-1.png",
   interfaceAlt:
     "The native Orbitonic plugin interface with three sample bodies moving across orbital gates",
   interfaceWidth: 1180,
   interfaceHeight: 760,
   mediaPresentation: "interface",
   accent: "#c94e32",
-  mediaBackground: "#f5f0e6",
+  mediaBackground: "#f7f8f6",
   facts: [
     { label: "System", value: "macOS 11+ / Windows x64" },
     {
@@ -383,33 +383,33 @@ export const orbitonic: PluginDetail = {
       platform: "macOS",
       label: "macOS Universal 2 · AU / VST3 / Standalone",
       meta:
-        "v0.1.0 · macOS 11+ · Universal 2 · AU / VST3 / Standalone · 24.9 MB ZIP",
+        "v0.1.1 · macOS 11+ · Universal 2 · AU / VST3 / Standalone · 26.1 MB ZIP",
       note:
         "This test build is ad-hoc signed and not notarized. macOS may block opening or plug-in scanning, and manual installation or system approval may be required. Real DAW use and listening approval remain unverified.",
       availability: "candidate",
       href:
-        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-08/Orbitonic-v0.1.0-macOS-Universal2-AU-VST3-Standalone.zip",
+        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-08/Orbitonic-v0.1.1-macOS-Universal2-AU-VST3-Standalone.zip",
       delivery: "external-file",
-      filename: "Orbitonic-v0.1.0-macOS-Universal2-AU-VST3-Standalone.zip",
-      bytes: 24_894_208,
+      filename: "Orbitonic-v0.1.1-macOS-Universal2-AU-VST3-Standalone.zip",
+      bytes: 26_104_877,
       sha256:
-        "9f70ba4d0948bdf7c529dab525bd90361859afccc1133ab6399babc48ab0f237",
+        "b545036e917a7ecd85c3f6be80dc0d95c0f402012e062fa35d7579e7c9c1fceb",
     },
     {
       id: "orbitonic-windows-x64",
       platform: "Windows",
       label: "Windows x64 · VST3 / Standalone",
-      meta: "v0.1.0 · Windows x64 · VST3 / Standalone · 8.7 MB ZIP",
+      meta: "v0.1.1 · Windows x64 · VST3 / Standalone · 9.1 MB ZIP",
       note:
         "This Windows x64 cross-build is unsigned and has not yet been run or scanned in a DAW on Windows. If it does not open or appear, wait for a later validated build.",
       availability: "candidate",
       href:
-        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-08/Orbitonic-v0.1.0-Windows-x64-VST3-Standalone.zip",
+        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-08/Orbitonic-v0.1.1-Windows-x64-VST3-Standalone.zip",
       delivery: "external-file",
-      filename: "Orbitonic-v0.1.0-Windows-x64-VST3-Standalone.zip",
-      bytes: 8_731_251,
+      filename: "Orbitonic-v0.1.1-Windows-x64-VST3-Standalone.zip",
+      bytes: 9_135_852,
       sha256:
-        "51e6445385e0d4f0b0c254792387076d251226fced68293519f8d74f69c1d59a",
+        "9f61acb70abb59b51b9ea3f57caf92ae49e49eec321e42c997154ab86e5fed9d",
     },
   ],
   videos: [],
