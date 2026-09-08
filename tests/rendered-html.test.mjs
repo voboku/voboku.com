@@ -99,6 +99,21 @@ test("keeps the home icons in an iPhone-style four-column grid", async () => {
   assert.ok(html.indexOf('href="/plugins/converge"') < html.indexOf('href="/applications"'));
 });
 
+test("shows DriftField's original icon without the folder-style frame", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const tile = css.match(/\.driftfield-app-icon\s*\{([^}]+)\}/)?.[1] ?? "";
+  const image = css.match(/\.driftfield-app-icon img\s*\{([^}]+)\}/)?.[1] ?? "";
+  assert.match(tile, /border:\s*0/);
+  assert.match(tile, /background:\s*transparent/);
+  assert.match(image, /width:\s*100%/);
+  assert.match(image, /transform:\s*scale\(calc\(256 \/ 223\)\)/);
+  const html = await (await render()).text();
+  assert.equal((html.match(/class="plugin-app-icon driftfield-app-icon"/g) ?? []).length, 1);
+  assert.match(html, /class="plugin-app-icon driftfield-app-icon"><img src="\/media\/driftfield-icon-soft-sequence\.png"/);
+  assert.match(html, /href="\/plugins\/driftfield"/);
+  assert.match(html, /class="plugin-app-icon web-applications-folder-icon"/);
+});
+
 test("server-renders the web applications as one textless collection", async () => {
   const response = await render("/applications");
   assert.equal(response.status, 200);

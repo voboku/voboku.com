@@ -312,7 +312,13 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
               title={work.name}
               key={work.id}
             >
-              <span className="plugin-app-icon">
+              <span
+                className={
+                  work.id === "driftfield"
+                    ? "plugin-app-icon driftfield-app-icon"
+                    : "plugin-app-icon"
+                }
+              >
                 <img src={work.iconSrc} alt="" />
               </span>
               <span>{work.name}</span>

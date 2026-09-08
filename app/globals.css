@@ -683,6 +683,18 @@ img {
   object-fit: contain;
 }
 
+.driftfield-app-icon {
+  border: 0;
+  background: transparent;
+}
+
+.driftfield-app-icon img {
+  width: 100%;
+  max-width: none;
+  /* Fill the tile with the original artwork, excluding its transparent inset. */
+  transform: scale(calc(256 / 223));
+}
+
 .seed-folder-icon {
   padding: 7px;
   display: grid;
