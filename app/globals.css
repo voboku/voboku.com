@@ -695,6 +695,22 @@ img {
   transform: scale(calc(256 / 223));
 }
 
+.clock-app {
+  cursor: default;
+}
+
+.clock-app-icon {
+  border: 0;
+  padding: 2px;
+  background: var(--ink);
+}
+
+.clock-app-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .seed-folder-icon {
   padding: 7px;
   display: grid;

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { access, readFile, stat } from "node:fs/promises";
 import test from "node:test";
+import ts from "typescript";
 
 async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -41,7 +42,7 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /aria-label="Lock Sound Objects"/);
   assert.doesNotMatch(html, /Opening Sound Objects/);
   assert.match(html, /Available sound objects/);
-  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 6);
+  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 7);
   assert.match(html, /\/media\/driftfield-icon-soft-sequence\.png/);
   assert.match(html, /\/media\/bugnote-3-icon\.png/);
   assert.match(html, /\/media\/harmonic-terrain-icon\.png/);
@@ -112,6 +113,95 @@ test("shows DriftField's original icon without the folder-style frame", async ()
   assert.match(html, /class="plugin-app-icon driftfield-app-icon"><img src="\/media\/driftfield-icon-soft-sequence\.png"/);
   assert.match(html, /href="\/plugins\/driftfield"/);
   assert.match(html, /class="plugin-app-icon web-applications-folder-icon"/);
+});
+
+test("places a live analog clock in the icon grid without a large clock widget", async () => {
+  const html = await (await render()).text();
+  assert.match(html, /<time class="plugin-app clock-app" dateTime="10:00:00" aria-label="Current time: 10:00"/);
+  assert.match(html, /class="plugin-app-icon clock-app-icon"/);
+  assert.match(html, /<span>Clock<\/span>/);
+  assert.doesNotMatch(html, /class="home-clock"/);
+  assert.ok(html.indexOf('href="/applications"') < html.indexOf('class="plugin-app clock-app"'));
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /rotate\(\$\{clock\.hourAngle\} 32 32\)/);
+  assert.match(page, /rotate\(\$\{clock\.minuteAngle\} 32 32\)/);
+  assert.match(page, /rotate\(\$\{clock\.secondAngle\} 32 32\)/);
+});
+
+test("derives the clock hands and accessible time from the same local date", async () => {
+  const source = await readFile(new URL("../app/_lib/clock.ts", import.meta.url), "utf8");
+  const output = ts.transpileModule(source, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
+  }).outputText;
+  const { readClock, initialClock } = await import(`data:text/javascript;base64,${Buffer.from(output).toString("base64")}`);
+  assert.equal(initialClock.timeValue, "10:00:00");
+  const clock = readClock(new Date(2026, 8, 9, 3, 15, 30));
+  assert.equal(clock.time, "3:15");
+  assert.equal(clock.timeValue, "03:15:30");
+  assert.equal(clock.date, "Wednesday, September 9");
+  assert.equal(clock.hourAngle, 97.75);
+  assert.equal(clock.minuteAngle, 93);
+  assert.equal(clock.secondAngle, 180);
+  const midnight = readClock(new Date(2026, 8, 9, 0, 0, 0));
+  assert.equal(midnight.timeValue, "00:00:00");
+  assert.equal(midnight.hourAngle, 0);
+  const noon = readClock(new Date(2026, 8, 9, 12, 0, 0));
+  assert.equal(noon.time, "12:00");
+  assert.equal(noon.hourAngle, 0);
+  const nextDay = readClock(new Date(2026, 8, 9, 23, 59, 60));
+  assert.equal(nextDay.timeValue, "00:00:00");
+  assert.equal(nextDay.date, "Thursday, September 10");
+});
+
+test("refreshes the clock each second, pauses in the background, and cleans up", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const body = page.match(/useEffect\(\(\) => \{(\s*let clockTimer:[\s\S]*?)\n  \}, \[\]\);/)?.[1];
+  assert.ok(body);
+  const output = ts.transpileModule(`function startClock() {${body}\n}`, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const browser = new EventTarget();
+  const document = new EventTarget();
+  document.visibilityState = "visible";
+  const timers = new Map();
+  let nextTimer = 0;
+  let now = 1_250;
+  const seen = [];
+  browser.setTimeout = (callback, delay) => {
+    const id = ++nextTimer;
+    timers.set(id, { callback, delay });
+    return id;
+  };
+  browser.clearTimeout = (id) => timers.delete(id);
+  const cleanup = new Function("window", "document", "setClock", "readClock", "Date", `${output}\nreturn startClock();`)(
+    browser, document, (clock) => seen.push(clock), () => now, { now: () => now },
+  );
+  assert.deepEqual(seen, [1_250]);
+  assert.equal(timers.size, 1);
+  const tick = [...timers.values()][0];
+  assert.equal(tick.delay, 750);
+  now = 2_000;
+  tick.callback();
+  assert.equal(seen.at(-1), 2_000);
+  assert.equal(timers.size, 1);
+  document.visibilityState = "hidden";
+  document.dispatchEvent(new Event("visibilitychange"));
+  assert.equal(timers.size, 0);
+  now = 65_123;
+  document.visibilityState = "visible";
+  document.dispatchEvent(new Event("visibilitychange"));
+  assert.equal(seen.at(-1), 65_123);
+  assert.equal([...timers.values()][0].delay, 877);
+  browser.dispatchEvent(new Event("pageshow"));
+  browser.dispatchEvent(new Event("focus"));
+  assert.equal(timers.size, 1);
+  cleanup();
+  assert.equal(timers.size, 0);
+  const count = seen.length;
+  document.dispatchEvent(new Event("visibilitychange"));
+  browser.dispatchEvent(new Event("pageshow"));
+  browser.dispatchEvent(new Event("focus"));
+  assert.equal(seen.length, count);
 });
 
 test("server-renders the web applications as one textless collection", async () => {

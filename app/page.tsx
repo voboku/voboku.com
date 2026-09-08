@@ -3,13 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { pluginWorks as works } from "./_data/plugins";
 import { webApplications } from "./_data/web-instruments";
+import { initialClock, readClock, type Clock } from "./_lib/clock";
 
 type Phase = "checking" | "locked" | "passcode" | "home";
-
-type Clock = {
-  time: string;
-  date: string;
-};
 
 const passcodeLength = 6;
 const lockPasscode = "200101";
@@ -26,24 +22,6 @@ const keypad = [
   { digit: "8", letters: "TUV" },
   { digit: "9", letters: "WXYZ" },
 ] as const;
-
-function readClock(): Clock {
-  const now = new Date();
-  return {
-    time: new Intl.DateTimeFormat("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    })
-      .format(now)
-      .replace(/^0/, ""),
-    date: new Intl.DateTimeFormat("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    }).format(now),
-  };
-}
 
 type LockScreenProps = {
   clock: Clock;
@@ -96,7 +74,7 @@ function LockScreen({
       </svg>
       <div className="lock-clock">
         <p>{clock.date}</p>
-        <time dateTime={clock.time}>{clock.time}</time>
+        <time dateTime={clock.timeValue}>{clock.time}</time>
       </div>
 
       <div className="lock-utilities" aria-hidden="true">
@@ -345,6 +323,43 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
             </span>
             <span title={webApplications.name}>Web Apps</span>
           </a>
+
+          <time
+            className="plugin-app clock-app"
+            dateTime={clock.timeValue}
+            aria-label={`Current time: ${clock.time}`}
+            title={clock.time}
+          >
+            <span className="plugin-app-icon clock-app-icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64" focusable="false">
+                <circle cx="32" cy="32" r="29" fill="white" />
+                <g stroke="currentColor" strokeWidth="1">
+                  {Array.from({ length: 12 }, (_, index) => (
+                    <line
+                      key={index}
+                      x1="32" y1="6" x2="32" y2="9"
+                      transform={`rotate(${index * 30} 32 32)`}
+                    />
+                  ))}
+                </g>
+                <g fill="currentColor" fontSize="8" fontWeight="600" textAnchor="middle">
+                  <text x="32" y="19">12</text>
+                  <text x="48" y="35">3</text>
+                  <text x="32" y="51">6</text>
+                  <text x="16" y="35">9</text>
+                </g>
+                <g stroke="currentColor" strokeLinecap="round">
+                  <line x1="32" y1="34" x2="32" y2="19" strokeWidth="3.5" transform={`rotate(${clock.hourAngle} 32 32)`} />
+                  <line x1="32" y1="35" x2="32" y2="12" strokeWidth="2.5" transform={`rotate(${clock.minuteAngle} 32 32)`} />
+                </g>
+                <g stroke="var(--coral)" fill="var(--coral)">
+                  <line x1="32" y1="37" x2="32" y2="9" strokeWidth="1" transform={`rotate(${clock.secondAngle} 32 32)`} />
+                  <circle cx="32" cy="32" r="2" />
+                </g>
+              </svg>
+            </span>
+            <span>Clock</span>
+          </time>
         </nav>
       </div>
     </section>
@@ -353,7 +368,7 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
 
 export default function Home() {
   const [phase, setPhase] = useState<Phase>("checking");
-  const [clock, setClock] = useState<Clock>({ time: "10:00", date: "Sound Objects" });
+  const [clock, setClock] = useState<Clock>(initialClock);
   const [passcode, setPasscode] = useState("");
   const [passcodeError, setPasscodeError] = useState(false);
   const pointerStartYRef = useRef<number | null>(null);
@@ -363,12 +378,27 @@ export default function Home() {
   const homeHeadingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    const updateClock = () => setClock(readClock());
+    let clockTimer: number | undefined;
+    const updateClock = () => {
+      window.clearTimeout(clockTimer);
+      setClock(readClock());
+      if (document.visibilityState !== "hidden") {
+        clockTimer = window.setTimeout(
+          updateClock,
+          1_000 - (Date.now() % 1_000),
+        );
+      }
+    };
     updateClock();
-    const clockTimer = window.setInterval(updateClock, 30_000);
+    document.addEventListener("visibilitychange", updateClock);
+    window.addEventListener("pageshow", updateClock);
+    window.addEventListener("focus", updateClock);
 
     return () => {
-      window.clearInterval(clockTimer);
+      window.clearTimeout(clockTimer);
+      document.removeEventListener("visibilitychange", updateClock);
+      window.removeEventListener("pageshow", updateClock);
+      window.removeEventListener("focus", updateClock);
     };
   }, []);
 
