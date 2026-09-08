@@ -42,7 +42,9 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /aria-label="Lock Sound Objects"/);
   assert.doesNotMatch(html, /Opening Sound Objects/);
   assert.match(html, /Available sound objects/);
-  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 7);
+  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 8);
+  assert.match(html, /href="\/contact" aria-label="Open Contact"/);
+  assert.match(html, /class="plugin-app-icon contact-app-icon"/);
   assert.match(html, /\/media\/driftfield-icon-soft-sequence\.png/);
   assert.match(html, /\/media\/bugnote-3-icon\.png/);
   assert.match(html, /\/media\/harmonic-terrain-icon\.png/);
@@ -202,6 +204,43 @@ test("refreshes the clock each second, pauses in the background, and cleans up",
   browser.dispatchEvent(new Event("pageshow"));
   browser.dispatchEvent(new Event("focus"));
   assert.equal(seen.length, count);
+});
+
+test("provides the requested contact links in an accessible static page", async () => {
+  const response = await render("/contact");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /<title>Contact<\/title>/);
+  assert.match(html, /href="\/" aria-label="Back to home"/);
+  assert.match(html, /role="region" tabindex="0" aria-label="Contact details"/);
+  assert.match(html, /aria-label="Choose a contact method"/);
+  const links = [...html.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>/g)];
+  assert.deepEqual(links.map((link) => link[1]), [
+    "/",
+    "mailto:booking.vq@gmail.com",
+    "https://x.com/voboku",
+    "https://www.instagram.com/voboku/",
+  ]);
+  assert.doesNotMatch(links[1][0], /target=/);
+  for (const link of links.slice(2)) {
+    assert.match(link[0], /target="_blank"/);
+    assert.match(link[0], /rel="noopener noreferrer"/);
+    assert.match(link[0], /opens in a new tab/);
+  }
+  assert.match(html, /booking\.vq@gmail\.com/);
+  assert.match(html, /X \(Twitter\)/);
+  assert.match(html, /Instagram/);
+  assert.doesNotMatch(html, /<form\b|<iframe\b/);
+  const exported = await readFile(new URL("../dist/client/contact.html", import.meta.url), "utf8");
+  assert.match(exported, /<link rel="canonical" href="https:\/\/voboku\.com\/contact\/"\/>/);
+  assert.match(exported, /href="mailto:booking\.vq@gmail\.com"/);
+  assert.match(exported, /href="https:\/\/x\.com\/voboku"/);
+  assert.match(exported, /href="https:\/\/www\.instagram\.com\/voboku\/"/);
+  assert.match(exported, /og-white-20260905\.png/);
+  const styles = await readFile(new URL("../app/contact/contact.module.css", import.meta.url), "utf8");
+  assert.match(styles, /min-height:\s*88px/);
+  assert.match(styles, /overflow-wrap:\s*anywhere/);
+  assert.match(styles, /\.link:focus-visible/);
 });
 
 test("server-renders the web applications as one textless collection", async () => {

@@ -360,6 +360,16 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
             </span>
             <span>Clock</span>
           </time>
+
+          <a className="plugin-app" href="/contact" aria-label="Open Contact">
+            <span className="plugin-app-icon contact-app-icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" focusable="false">
+                <rect x="12" y="19" width="40" height="28" rx="5" />
+                <path d="m14 22 18 13 18-13" />
+              </svg>
+            </span>
+            <span>Contact</span>
+          </a>
         </nav>
       </div>
     </section>
