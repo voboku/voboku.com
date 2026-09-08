@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Bugnote Granular</title>
+    <link rel="stylesheet" href="./style.css?v=20260710-10" />
+  </head>
+  <body>
+    <main id="world" aria-label="Granular sampler">
+      <canvas id="cloud"></canvas>
+
+      <nav class="effects" aria-label="Effects">
+        <button type="button" data-effect="stretch" aria-label="Stretch" aria-pressed="false">↔</button>
+        <button type="button" data-effect="ambient" aria-label="Ambient" aria-pressed="false">∞</button>
+        <button type="button" data-effect="pitch" aria-label="Pitch" aria-pressed="false">⌁</button>
+        <button type="button" data-effect="spray" aria-label="Spray" aria-pressed="false">✣</button>
+      </nav>
+
+      <div class="touch-size" aria-label="Touch circle size">
+        <label class="touch-size-path">
+          <input id="touch-size" type="range" min="8" max="140" value="22" aria-label="Touch circle size" />
+          <span class="touch-size-dots" aria-hidden="true"></span>
+        </label>
+        <output id="touch-size-value" for="touch-size" aria-hidden="true"></output>
+      </div>
+
+      <div class="chop-count" aria-label="Chop count">
+        <label class="chop-count-path">
+          <input id="chop-count" type="range" min="128" max="512" step="64" value="512" aria-label="Chop count" />
+          <span class="chop-count-dots" aria-hidden="true"></span>
+        </label>
+        <output id="chop-count-value" for="chop-count" aria-hidden="true"></output>
+      </div>
+
+      <button id="record" class="record" type="button" aria-label="Record" aria-pressed="false"></button>
+      <a id="save" class="save" hidden aria-label="Save recording">↓</a>
+
+      <input id="audio-file" type="file" accept="audio/*,.wav,.mp3,.m4a,.aac,.aif,.aiff" />
+      <label id="upload" for="audio-file" aria-label="Choose an audio file">＋</label>
+
+      <div id="audio-state" class="sr-only" role="status" aria-live="polite"></div>
+    </main>
+    <script src="./script.js?v=20260710-10"></script>
+  </body>
+</html>

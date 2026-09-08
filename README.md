@@ -4,8 +4,12 @@ A responsive, app-like archive for music plug-ins and browser instruments.
 
 The current site includes dedicated pages for DriftField and bugnote 3,
 downloadable macOS public test builds, a SEED series collection, and isolated
-launch pages for imagescansound and orbitonic. The interface uses a white phone
+launch pages for imagescansound, orbitonic, and bugnote. The interface uses a white phone
 silhouette on an acid-lime field and keeps visible copy intentionally compact.
+
+The Web Apps collection opens each instrument only after pressing Launch.
+bugnote uses a local snapshot of its published browser app; its source and
+checksums are recorded in `public/web-instruments/bugnote/PROVENANCE.md`.
 
 ## Local development
 

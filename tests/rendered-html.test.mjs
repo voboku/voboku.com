@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { access, readFile, stat } from "node:fs/promises";
 import test from "node:test";
+import { Script } from "node:vm";
 import ts from "typescript";
 
 async function render(pathname = "/") {
@@ -69,6 +70,9 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /\/media\/orbitonic-icon\.svg/);
   assert.match(html, /data-instrument="imagescansound"/);
   assert.match(html, /data-instrument="orbitonic"/);
+  assert.match(html, /data-instrument="bugnote"/);
+  assert.match(html, /\/media\/bugnote-legacy-icon\.png/);
+  assert.doesNotMatch(html, /href="\/instruments\/bugnote"/);
   assert.doesNotMatch(
     html,
     /\/media\/(?:ecosystem-drums\.jpg|flower-groove\.png)/,
@@ -92,6 +96,8 @@ test("keeps the home icons in an iPhone-style four-column grid", async () => {
   assert.match(icon, /aspect-ratio:\s*1/);
   assert.match(label, /font-size:\s*12px/);
   assert.match(label, /overflow-wrap:\s*anywhere/);
+  const folder = css.match(/\.web-applications-folder-icon\s*\{([^}]+)\}/)?.[1] ?? "";
+  assert.match(folder, /grid-template-rows:\s*repeat\(2, minmax\(0, 1fr\)\)/);
   // Available cell widths stay above the 44 px touch target on phone widths.
   for (const viewport of [320, 375, 390, 430]) {
     const device = Math.min(viewport - 16, 316);
@@ -157,7 +163,7 @@ test("derives the clock hands and accessible time from the same local date", asy
 
 test("refreshes the clock each second, pauses in the background, and cleans up", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  const body = page.match(/useEffect\(\(\) => \{(\s*let clockTimer:[\s\S]*?)\n  \}, \[\]\);/)?.[1];
+  const body = page.match(/useEffect\(\(\) => \{(\s*let clockTimer:[\s\S]*?)\n {2}\}, \[\]\);/)?.[1];
   assert.ok(body);
   const output = ts.transpileModule(`function startClock() {${body}\n}`, {
     compilerOptions: { target: ts.ScriptTarget.ES2022 },
@@ -255,11 +261,14 @@ test("server-renders the web applications as one textless collection", async () 
   assert.match(html, /Back to Sound Objects/);
   assert.match(html, /href="\/instruments\/imagescansound"/);
   assert.match(html, /href="\/instruments\/orbitonic"/);
+  assert.match(html, /href="\/instruments\/bugnote"/);
+  assert.match(html, /Open bugnote/);
+  assert.match(html, /\/media\/bugnote-legacy-icon\.png/);
   assert.match(html, /Open imagescansound/);
   assert.match(html, /Open orbitonic/);
   assert.match(html, /\/media\/imagescansound-icon\.svg/);
   assert.match(html, /\/media\/orbitonic-icon\.svg/);
-  assert.doesNotMatch(html, />\s*(?:imagescansound|orbitonic)\s*</);
+  assert.doesNotMatch(html, />\s*(?:imagescansound|orbitonic|bugnote)\s*</);
 
   const exportedHtml = await readFile(
     new URL("../dist/client/applications.html", import.meta.url),
@@ -271,10 +280,11 @@ test("server-renders the web applications as one textless collection", async () 
   );
   assert.match(exportedHtml, /href="\/instruments\/imagescansound"/);
   assert.match(exportedHtml, /href="\/instruments\/orbitonic"/);
-  assert.doesNotMatch(exportedHtml, />\s*(?:imagescansound|orbitonic)\s*</);
+  assert.match(exportedHtml, /href="\/instruments\/bugnote"/);
+  assert.doesNotMatch(exportedHtml, />\s*(?:imagescansound|orbitonic|bugnote)\s*</);
 });
 
-test("server-renders lightweight launch screens for both web instruments", async () => {
+test("server-renders lightweight launch screens for all three web instruments", async () => {
   for (const instrument of [
     {
       slug: "imagescansound",
@@ -286,13 +296,20 @@ test("server-renders lightweight launch screens for both web instruments", async
       title: "orbitonic",
       description: "turns planetary orbits and crossings into rhythm",
     },
+    {
+      slug: "bugnote",
+      title: "bugnote",
+      pageTitle: "bugnote",
+      icon: "bugnote-legacy-icon.png",
+      description: "Load an audio file, then touch the particle cloud",
+    },
   ]) {
     const response = await render(`/instruments/${instrument.slug}`);
     assert.equal(response.status, 200);
     assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
     const html = await response.text();
-    assert.match(html, new RegExp(`<title>${instrument.title} — Sound Objects<\\/title>`));
+    assert.match(html, new RegExp(`<title>${instrument.pageTitle ?? `${instrument.title} — Sound Objects`}<\\/title>`));
     assert.match(html, new RegExp(instrument.description));
     assert.match(html, new RegExp(`${instrument.title} web instrument`));
     assert.match(html, /Back to Sound Objects/);
@@ -303,7 +320,7 @@ test("server-renders lightweight launch screens for both web instruments", async
     );
     assert.match(
       html,
-      new RegExp(`<img[^>]+src="/media/${instrument.slug}-icon\\.svg"[^>]*>`),
+      new RegExp(`<img[^>]+src="/media/${instrument.icon ?? `${instrument.slug}-icon.svg`}"[^>]*>`),
     );
     assert.match(
       html,
@@ -839,6 +856,40 @@ test("exports the immutable web-instrument snapshots under the same origin", asy
   }
 });
 
+test("exports bugnote's published self-contained web app without changing its audio engine", async () => {
+  for (const [filename, hash] of Object.entries({
+    "index.html": "fcdd7f3563345420b62946badcda7b49f563e0c413c734fa6273757ff6e62dbb",
+    "script.js": "c6934f2842decdb9b0bbe529d2400c004df0d16b581e019495553b884207daa3",
+    "style.css": "30fc9f579f6e63d735f9e3d8d039b865afa304d673be84ac35c2c2d1f73b701f",
+  })) {
+    const source = await readFile(new URL(`../public/web-instruments/bugnote/${filename}`, import.meta.url));
+    const exported = await readFile(new URL(`../dist/client/web-instruments/bugnote/${filename}`, import.meta.url));
+    assert.equal(createHash("sha256").update(source).digest("hex"), hash);
+    assert.deepEqual(exported, source);
+    assert.ok(source.byteLength < 25_000_000);
+  }
+  const entry = await readFile(new URL("../public/web-instruments/bugnote/index.html", import.meta.url), "utf8");
+  const script = await readFile(new URL("../public/web-instruments/bugnote/script.js", import.meta.url), "utf8");
+  const css = await readFile(new URL("../public/web-instruments/bugnote/style.css", import.meta.url), "utf8");
+  assert.doesNotThrow(() => new Script(script));
+  assert.match(entry, /src="\.\/script\.js\?v=20260710-10"/);
+  assert.match(entry, /href="\.\/style\.css\?v=20260710-10"/);
+  assert.match(entry, /id="audio-file" type="file" accept="audio\//);
+  for (const [, id] of script.matchAll(/querySelector\("#([\w-]+)"\)/g)) {
+    assert.ok(entry.includes(`id="${id}"`), `Missing element: ${id}`);
+  }
+  assert.doesNotMatch(entry + script + css, /https?:\/\/|\bfetch\s*\(|XMLHttpRequest|\bimport\s*\(/);
+  assert.match(script, /decodeAudioData/);
+  assert.match(script, /mobile \? 3600 : 8000/);
+  const route = await readFile(new URL("../dist/client/instruments/bugnote.html", import.meta.url), "utf8");
+  assert.match(route, /<title>bugnote<\/title>/);
+  assert.match(route, /href="https:\/\/voboku\.com\/instruments\/bugnote\/"/);
+  assert.match(route, /og-white-20260905\.png/);
+  assert.doesNotMatch(route, /<iframe\b|<meta (?:property="og:description"|name="twitter:description")/);
+  assert.match(route, /href="\/web-instruments\/bugnote\/index\.html"/);
+  assert.match(route, /aria-label="Launch bugnote"/);
+});
+
 test("requires the six-digit passcode and keeps home and downloads accessible", async () => {
   const [
     page,
@@ -916,6 +967,9 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(webInstrumentData, /embedSrc:\s*"\/web-instruments\/orbitonic\/index\.html"/);
   assert.match(webInstrumentData, /iconSrc:\s*"\/media\/orbitonic-icon\.svg"/);
   assert.match(webInstrumentData, /9ce5406c5eb732aa63ab1e0228f6f985917fad87/);
+  assert.match(webInstrumentData, /id:\s*"bugnote"/);
+  assert.match(webInstrumentData, /embedSrc:\s*"\/web-instruments\/bugnote\/index\.html"/);
+  assert.match(webInstrumentData, /dbee1eca7e494bca4c349364be7692647f65b15a/);
   assert.match(webInstrumentData, /export const webApplications/);
   assert.match(webInstrumentData, /href:\s*"\/applications"/);
   assert.match(webInstrumentData, /members:\s*webInstruments/);

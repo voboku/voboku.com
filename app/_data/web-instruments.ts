@@ -1,5 +1,5 @@
 export type WebInstrument = {
-  id: "imagescansound" | "orbitonic";
+  id: "imagescansound" | "orbitonic" | "bugnote";
   title: string;
   description: string;
   href: string;
@@ -34,6 +34,18 @@ export const webInstruments = [
     accent: "#c94e32",
     repository: "https://github.com/voboku/orbit",
     commit: "9ce5406c5eb732aa63ab1e0228f6f985917fad87",
+  },
+  {
+    id: "bugnote",
+    title: "bugnote",
+    description:
+      "Load an audio file, then touch the particle cloud to play grains and shape the sound.",
+    href: "/instruments/bugnote",
+    embedSrc: "/web-instruments/bugnote/index.html",
+    iconSrc: "/media/bugnote-legacy-icon.png",
+    accent: "#7398d5",
+    repository: "https://github.com/voboku/bugnote",
+    commit: "dbee1eca7e494bca4c349364be7692647f65b15a",
   },
 ] as const satisfies readonly WebInstrument[];
 
