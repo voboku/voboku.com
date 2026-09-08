@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { pluginWorks as works, seedSeries } from "./_data/plugins";
+import { pluginWorks as works } from "./_data/plugins";
 import { webApplications } from "./_data/web-instruments";
 
 type Phase = "checking" | "locked" | "passcode" | "home";
@@ -14,12 +14,7 @@ type Clock = {
 const passcodeLength = 6;
 const lockPasscode = "200101";
 const unlockStorageKey = "sound-objects-unlocked-v1";
-const seedMemberIds = new Set<string>(
-  seedSeries.members.map((member) => member.id),
-);
-const homeWorks = works.filter(
-  (work) => work.detailHref !== null && !seedMemberIds.has(work.id),
-);
+const homeWorks = works.filter((work) => work.detailHref !== null);
 const keypad = [
   { digit: "1", letters: "" },
   { digit: "2", letters: "ABC" },
@@ -309,22 +304,6 @@ function PluginHome({ active, clock, headingRef, onLock }: PluginHomeProps) {
         </h1>
 
         <nav className="plugin-apps" aria-label="Available sound objects">
-          <a
-            className="plugin-app"
-            href={seedSeries.href}
-            aria-label="Open SEED series"
-          >
-            <span
-              className="plugin-app-icon seed-folder-icon"
-              aria-hidden="true"
-            >
-              {seedSeries.members.slice(0, 4).map((member) => (
-                <img src={member.visual} alt="" key={member.id} />
-              ))}
-            </span>
-            <span>{seedSeries.name}</span>
-          </a>
-
           {homeWorks.map((work) => (
             <a
               className="plugin-app"

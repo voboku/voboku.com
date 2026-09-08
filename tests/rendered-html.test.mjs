@@ -45,7 +45,8 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /\/media\/driftfield-icon-soft-sequence\.png/);
   assert.match(html, /\/media\/bugnote-3-icon\.png/);
   assert.match(html, /\/media\/harmonic-terrain-icon\.png/);
-  assert.doesNotMatch(html, /href="\/plugins\/driftfield"/);
+  assert.match(html, /href="\/plugins\/driftfield"/);
+  assert.match(html, /Open DriftField/);
   assert.match(html, /href="\/plugins\/bugnote-3"/);
   assert.match(html, /href="\/plugins\/harmonic-terrain"/);
   assert.match(html, /Open Harmonic Terrain/);
@@ -54,8 +55,8 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /href="\/plugins\/converge"/);
   assert.match(html, /Open Converge/);
   assert.match(html, /\/media\/converge-icon\.png/);
-  assert.match(html, /href="\/series\/seed"/);
-  assert.match(html, /Open SEED series/);
+  assert.doesNotMatch(html, /href="\/series\/seed"/);
+  assert.doesNotMatch(html, /Open SEED series|seed-folder-icon/);
   assert.match(html, /href="\/applications"/);
   assert.match(html, /Open web applications/);
   assert.match(html, /<span title="Web Applications">Web Apps<\/span>/);
@@ -753,8 +754,8 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(page, /Delete/);
   assert.doesNotMatch(page, /firstKeyRef/);
   assert.doesNotMatch(page, /lock-orbit/);
-  assert.match(page, /!seedMemberIds\.has\(work\.id\)/);
-  assert.match(page, /Open SEED series/);
+  assert.match(page, /work\.detailHref !== null/);
+  assert.doesNotMatch(page, /seedMemberIds|Open SEED series/);
   assert.match(page, /webApplications\.members\.map/);
   assert.match(page, /Open web applications/);
   assert.match(page, /href=\{webApplications\.href\}/);
