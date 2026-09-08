@@ -41,7 +41,7 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /aria-label="Lock Sound Objects"/);
   assert.doesNotMatch(html, /Opening Sound Objects/);
   assert.match(html, /Available sound objects/);
-  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 4);
+  assert.equal((html.match(/class="plugin-app(?: [^"]+)?"/g) ?? []).length, 5);
   assert.match(html, /\/media\/driftfield-icon-soft-sequence\.png/);
   assert.match(html, /\/media\/bugnote-3-icon\.png/);
   assert.match(html, /\/media\/harmonic-terrain-icon\.png/);
@@ -49,6 +49,8 @@ test("server-renders the unlock-state gate and the available plugin pages only",
   assert.match(html, /href="\/plugins\/bugnote-3"/);
   assert.match(html, /href="\/plugins\/harmonic-terrain"/);
   assert.match(html, /Open Harmonic Terrain/);
+  assert.match(html, /href="\/plugins\/orbitonic"/);
+  assert.match(html, /Open Orbitonic/);
   assert.match(html, /href="\/series\/seed"/);
   assert.match(html, /Open SEED series/);
   assert.match(html, /href="\/applications"/);
@@ -300,6 +302,64 @@ test("server-renders Harmonic Terrain with its macOS public test download", asyn
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });
 
+test("server-renders Orbitonic with macOS and Windows native test downloads", async () => {
+  const response = await render("/plugins/orbitonic");
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+
+  const html = await response.text();
+  assert.match(html, /<title>Orbitonic — Sound Objects<\/title>/);
+  assert.match(html, /Orbitonic plugin page/);
+  assert.match(html, /\/media\/orbitonic-icon\.svg/);
+  assert.match(html, /\/media\/orbitonic-native-interface\.png/);
+  assert.match(html, /Back to plugin home/);
+  assert.match(html, /v0\.1\.0 · NATIVE TEST BUILD/);
+  assert.match(html, /sample-first orbital rhythm instrument/);
+  assert.match(html, /macOS 11\+ \/ Windows x64/);
+  assert.match(
+    html,
+    /macOS: AU \/ VST3 \/ Standalone · Windows: VST3 \/ Standalone/,
+  );
+  assert.match(html, /8 orbits \/ 8 bodies \/ 8 gates each/);
+  assert.match(html, /Host sync \/ Internal BPM/);
+  assert.match(html, /WAV \/ AIFF \/ FLAC \/ MP3 \/ Ogg/);
+  assert.match(html, />Download</);
+  assert.ok((html.match(/Test build/g) ?? []).length >= 2);
+  assert.match(html, /Download for macOS/);
+  assert.match(html, /Download for Windows/);
+  assert.match(html, /24\.9 MB ZIP/);
+  assert.match(html, /8\.7 MB ZIP/);
+  assert.match(html, /ad-hoc signed and not notarized/);
+  assert.match(html, /Windows x64 cross-build is unsigned/);
+  assert.match(
+    html,
+    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Orbitonic-v0\.1\.0-macOS-Universal2-AU-VST3-Standalone\.zip"/,
+  );
+  assert.match(
+    html,
+    /href="https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Orbitonic-v0\.1\.0-Windows-x64-VST3-Standalone\.zip"/,
+  );
+  assert.match(
+    html,
+    /9f70ba4d0948bdf7c529dab525bd90361859afccc1133ab6399babc48ab0f237/,
+  );
+  assert.match(
+    html,
+    /51e6445385e0d4f0b0c254792387076d251226fced68293519f8d74f69c1d59a/,
+  );
+  assert.equal(
+    (html.match(/<a\b[^>]*\bdata-download-link\b/g) ?? []).length,
+    2,
+  );
+  assert.ok(
+    html.indexOf("Orbitonic-v0.1.0-macOS-Universal2-AU-VST3-Standalone.zip") <
+      html.indexOf("Orbitonic-v0.1.0-Windows-x64-VST3-Standalone.zip"),
+  );
+  assert.doesNotMatch(html, /<video\b|<audio\b/);
+  assert.doesNotMatch(html, /Preparing release|Release build in preparation/);
+  assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
+});
+
 test("server-renders the current DriftField and preserves the earlier interface below", async () => {
   const response = await render("/plugins/driftfield");
   assert.equal(response.status, 200);
@@ -396,12 +456,15 @@ test("exports all routes, social metadata, and public test builds", async () => 
     rootHtml,
     bugnoteHtml,
     harmonicTerrainHtml,
+    orbitonicHtml,
     driftFieldHtml,
     seedHtml,
     netlifyConfig,
     driftFieldVideo,
     rootOgSource,
     rootOgExport,
+    orbitonicInterfaceSource,
+    orbitonicInterfaceExport,
   ] = await Promise.all([
     readFile(new URL("../dist/client/index.html", import.meta.url), "utf8"),
     readFile(new URL("../dist/client/plugins/bugnote-3.html", import.meta.url), "utf8"),
@@ -409,6 +472,7 @@ test("exports all routes, social metadata, and public test builds", async () => 
       new URL("../dist/client/plugins/harmonic-terrain.html", import.meta.url),
       "utf8",
     ),
+    readFile(new URL("../dist/client/plugins/orbitonic.html", import.meta.url), "utf8"),
     readFile(new URL("../dist/client/plugins/driftfield.html", import.meta.url), "utf8"),
     readFile(new URL("../dist/client/series/seed.html", import.meta.url), "utf8"),
     readFile(new URL("../netlify.toml", import.meta.url), "utf8"),
@@ -420,6 +484,10 @@ test("exports all routes, social metadata, and public test builds", async () => 
     ),
     readFile(new URL("../public/og-white-20260905.png", import.meta.url)),
     readFile(new URL("../dist/client/og-white-20260905.png", import.meta.url)),
+    readFile(new URL("../public/media/orbitonic-native-interface.png", import.meta.url)),
+    readFile(
+      new URL("../dist/client/media/orbitonic-native-interface.png", import.meta.url),
+    ),
   ]);
 
   assert.match(rootHtml, /<meta property="og:title" content="\u200b"\/>/);
@@ -445,6 +513,21 @@ test("exports all routes, social metadata, and public test builds", async () => 
   assert.match(harmonicTerrainHtml, /<meta property="og:title" content="Harmonic Terrain — Sound Objects"\/>/);
   assert.match(harmonicTerrainHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/harmonic-terrain-icon\.png"\/>/);
   assert.match(harmonicTerrainHtml, /https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Harmonic-Terrain-v0\.10\.0-macOS-arm64\.zip/);
+  assert.match(orbitonicHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/orbitonic\/"\/>/);
+  assert.match(orbitonicHtml, /<meta property="og:title" content="Orbitonic — Sound Objects"\/>/);
+  assert.match(orbitonicHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/orbitonic-native-interface\.png"\/>/);
+  assert.match(orbitonicHtml, /Orbitonic-v0\.1\.0-macOS-Universal2-AU-VST3-Standalone\.zip/);
+  assert.match(orbitonicHtml, /Orbitonic-v0\.1\.0-Windows-x64-VST3-Standalone\.zip/);
+  assert.equal(orbitonicInterfaceSource.byteLength, 111_142);
+  assert.equal(orbitonicInterfaceExport.byteLength, orbitonicInterfaceSource.byteLength);
+  assert.equal(
+    createHash("sha256").update(orbitonicInterfaceSource).digest("hex"),
+    "e41a288f9614e692cc38809b706564b27a2e2f7a1de90e555f2ae70cbc61969c",
+  );
+  assert.equal(
+    createHash("sha256").update(orbitonicInterfaceExport).digest("hex"),
+    "e41a288f9614e692cc38809b706564b27a2e2f7a1de90e555f2ae70cbc61969c",
+  );
   assert.match(driftFieldHtml, /<link rel="canonical" href="https:\/\/voboku\.com\/plugins\/driftfield\/"\/>/);
   assert.match(driftFieldHtml, /<meta property="og:title" content="DriftField — Sound Objects"\/>/);
   assert.match(driftFieldHtml, /<meta property="og:image" content="https:\/\/voboku\.com\/media\/driftfield-interface-current\.png"\/>/);
@@ -690,6 +773,7 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(pluginData, /detailHref:\s*"\/plugins\/driftfield"/);
   assert.match(pluginData, /detailHref:\s*"\/plugins\/bugnote-3"/);
   assert.match(pluginData, /detailHref:\s*"\/plugins\/harmonic-terrain"/);
+  assert.match(pluginData, /detailHref:\s*"\/plugins\/orbitonic"/);
   const harmonicTerrainSource =
     pluginData.match(/export const harmonicTerrain:[\s\S]*?\n\};/)?.[0] ?? "";
   assert.match(harmonicTerrainSource, /title:\s*"Harmonic Terrain"/);
@@ -697,6 +781,18 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
   assert.match(
     harmonicTerrainSource,
     /id:\s*"harmonic-terrain-macos-arm64"[\s\S]*?availability:\s*"candidate"[\s\S]*?href:[\s\S]*?"https:\/\/github\.com\/voboku\/voboku\.com\/releases\/download\/test-builds-2026-09-08\/Harmonic-Terrain-v0\.10\.0-macOS-arm64\.zip"[\s\S]*?delivery:\s*"external-file"[\s\S]*?bytes:\s*6_573_315[\s\S]*?71ea7bcccfda8f5e22819fd9e4a4f2b56a65881b1d391b37f3f8338336406a55/,
+  );
+  const orbitonicSource =
+    pluginData.match(/export const orbitonic:[\s\S]*?\n\};/)?.[0] ?? "";
+  assert.match(orbitonicSource, /title:\s*"Orbitonic"/);
+  assert.match(orbitonicSource, /icon:\s*"\/media\/orbitonic-icon\.svg"/);
+  assert.match(
+    orbitonicSource,
+    /id:\s*"orbitonic-macos-universal-2"[\s\S]*?availability:\s*"candidate"[\s\S]*?Orbitonic-v0\.1\.0-macOS-Universal2-AU-VST3-Standalone\.zip[\s\S]*?bytes:\s*24_894_208[\s\S]*?9f70ba4d0948bdf7c529dab525bd90361859afccc1133ab6399babc48ab0f237/,
+  );
+  assert.match(
+    orbitonicSource,
+    /id:\s*"orbitonic-windows-x64"[\s\S]*?platform:\s*"Windows"[\s\S]*?availability:\s*"candidate"[\s\S]*?Orbitonic-v0\.1\.0-Windows-x64-VST3-Standalone\.zip[\s\S]*?bytes:\s*8_731_251[\s\S]*?51e6445385e0d4f0b0c254792387076d251226fced68293519f8d74f69c1d59a/,
   );
   assert.match(pluginData, /icon:\s*"\/media\/driftfield-icon-soft-sequence\.png"/);
   assert.match(pluginData, /interfaceImage:\s*"\/media\/driftfield-interface-current\.png"/);
@@ -786,6 +882,7 @@ test("requires the six-digit passcode and keeps home and downloads accessible", 
     access(new URL("../public/media/bugnote-3-ui.jpg", import.meta.url)),
     access(new URL("../public/media/bugnote-3-icon.png", import.meta.url)),
     access(new URL("../public/media/harmonic-terrain-icon.png", import.meta.url)),
+    access(new URL("../public/media/orbitonic-native-interface.png", import.meta.url)),
     access(new URL("../public/media/bugnote-legacy-icon.png", import.meta.url)),
     access(new URL("../public/media/bugnote-interface-recording.mp4", import.meta.url)),
     access(

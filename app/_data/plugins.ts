@@ -165,6 +165,15 @@ export const pluginWorks = [
     alt: "Harmonic Terrain application icon",
     detailHref: "/plugins/harmonic-terrain",
   },
+  {
+    id: "orbitonic-native",
+    name: "Orbitonic",
+    archiveSection: "orbitonic",
+    src: "/media/orbitonic-native-interface.png",
+    iconSrc: "/media/orbitonic-icon.svg",
+    alt: "Orbitonic native plugin interface",
+    detailHref: "/plugins/orbitonic",
+  },
 ] as const;
 
 export const seedSeries = {
@@ -331,6 +340,76 @@ export const harmonicTerrain: PluginDetail = {
       bytes: 6_573_315,
       sha256:
         "71ea7bcccfda8f5e22819fd9e4a4f2b56a65881b1d391b37f3f8338336406a55",
+    },
+  ],
+  videos: [],
+  samplePacks: [],
+  tracks: [],
+};
+
+export const orbitonic: PluginDetail = {
+  slug: "orbitonic",
+  archiveSection: "orbitonic",
+  title: "Orbitonic",
+  version: "v0.1.0 · NATIVE TEST BUILD",
+  description:
+    "A sample-first orbital rhythm instrument where planets, gates and collisions turn movement into sound.",
+  statusNote:
+    "Current native test build. Automated macOS tests, Universal 2 builds and direct VST3 host checks passed locally; real DAW use, Windows execution, listening approval and production signing remain unverified.",
+  icon: "/media/orbitonic-icon.svg",
+  interfaceImage: "/media/orbitonic-native-interface.png",
+  interfaceAlt:
+    "The native Orbitonic plugin interface with three sample bodies moving across orbital gates",
+  interfaceWidth: 1180,
+  interfaceHeight: 760,
+  mediaPresentation: "interface",
+  accent: "#c94e32",
+  mediaBackground: "#f5f0e6",
+  facts: [
+    { label: "System", value: "macOS 11+ / Windows x64" },
+    {
+      label: "Formats",
+      value: "macOS: AU / VST3 / Standalone · Windows: VST3 / Standalone",
+    },
+    { label: "Capacity", value: "8 orbits / 8 bodies / 8 gates each" },
+    { label: "Voices", value: "32" },
+    { label: "Timing", value: "Host sync / Internal BPM" },
+    { label: "Samples", value: "WAV / AIFF / FLAC / MP3 / Ogg" },
+  ],
+  gestures: ["PLANET", "GATE", "SAMPLE", "MOVE", "MUTE", "UNDO", "CLEAR"],
+  downloads: [
+    {
+      id: "orbitonic-macos-universal-2",
+      platform: "macOS",
+      label: "macOS Universal 2 · AU / VST3 / Standalone",
+      meta:
+        "v0.1.0 · macOS 11+ · Universal 2 · AU / VST3 / Standalone · 24.9 MB ZIP",
+      note:
+        "This test build is ad-hoc signed and not notarized. macOS may block opening or plug-in scanning, and manual installation or system approval may be required. Real DAW use and listening approval remain unverified.",
+      availability: "candidate",
+      href:
+        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-08/Orbitonic-v0.1.0-macOS-Universal2-AU-VST3-Standalone.zip",
+      delivery: "external-file",
+      filename: "Orbitonic-v0.1.0-macOS-Universal2-AU-VST3-Standalone.zip",
+      bytes: 24_894_208,
+      sha256:
+        "9f70ba4d0948bdf7c529dab525bd90361859afccc1133ab6399babc48ab0f237",
+    },
+    {
+      id: "orbitonic-windows-x64",
+      platform: "Windows",
+      label: "Windows x64 · VST3 / Standalone",
+      meta: "v0.1.0 · Windows x64 · VST3 / Standalone · 8.7 MB ZIP",
+      note:
+        "This Windows x64 cross-build is unsigned and has not yet been run or scanned in a DAW on Windows. If it does not open or appear, wait for a later validated build.",
+      availability: "candidate",
+      href:
+        "https://github.com/voboku/voboku.com/releases/download/test-builds-2026-09-08/Orbitonic-v0.1.0-Windows-x64-VST3-Standalone.zip",
+      delivery: "external-file",
+      filename: "Orbitonic-v0.1.0-Windows-x64-VST3-Standalone.zip",
+      bytes: 8_731_251,
+      sha256:
+        "51e6445385e0d4f0b0c254792387076d251226fced68293519f8d74f69c1d59a",
     },
   ],
   videos: [],
